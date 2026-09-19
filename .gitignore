@@ -11,3 +11,4 @@
 
 # Salidas regenerables
 *.log
+!Escuela_Global/Estadistica_Aplicada/Clase 4/Data/series_peru.dta
