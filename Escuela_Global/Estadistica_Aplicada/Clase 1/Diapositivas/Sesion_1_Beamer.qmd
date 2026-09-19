@@ -1,0 +1,967 @@
+---
+title: "Estadística Descriptiva e Inferencial Aplicada"
+subtitle: "Sesión 1: Gestión y Preparación de Datos Económicos"
+author: "Escuela Global"
+date: "`r Sys.Date()`"
+lang: es
+format:
+  beamer:
+    theme: Madrid
+    colortheme: whale
+    fonttheme: default
+    navigation: frame
+    toc: false
+    slide-number: true
+    include-in-header:
+      text: |
+        \usepackage{xcolor}
+        \definecolor{EscuelaGlobal}{RGB}{51, 102, 204}
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, 
+                      fig.align = 'center', fig.width = 7, fig.height = 4,
+                      size = 'scriptsize')
+
+
+library(tidyverse)
+library(janitor)
+library(lubridate)
+```
+
+# Introducción
+
+## El Desafío de los Datos Reales
+
+::: block
+### Escenario Profesional Típico
+
+Una organización recibe una base de datos que contiene: - Registros de
+transacciones (miles de filas) - Información de múltiples fuentes:
+finanzas, operaciones, recursos humanos - Datos de diversos sectores
+económicos (Finanzas, Retail, Manufactura, Educación, Logística) -
+Problemas de calidad variados e inconsistencias documentadas
+:::
+
+**Pregunta Central**: ¿Cómo convertir datos crudos y problemáticos en
+información confiable?
+
+------------------------------------------------------------------------
+
+## El Principio 80/20 en Análisis Estadístico
+
+::: block
+### Distribución del Esfuerzo en Proyectos Reales
+
+-   **80%** del tiempo: Importación, diagnóstico, limpieza y
+    transformación de datos
+-   **15%** del tiempo: Análisis estadístico y modelado
+-   **5%** del tiempo: Visualización e interpretación de resultados
+
+**Los mejores analistas profesionales dedican la mayor parte del tiempo
+a garantizar calidad de datos.**
+:::
+
+------------------------------------------------------------------------
+
+## Objetivos de Aprendizaje
+
+Al término de esta sesión, el participante será capaz de:
+
+::: block
+### Competencias Desarrolladas
+
+1.  Importar datos desde múltiples formatos a Excel
+2.  Diagnosticar problemas de calidad usando herramientas de Excel
+3.  Limpiar inconsistencias de forma sistemática
+4.  Transformar variables (fechas, texto, numéricas)
+5.  Crear variables derivadas con significado económico
+6.  Documentar completamente el proceso de preparación
+7.  **Migrar de forma natural a R para automatizar**
+:::
+
+------------------------------------------------------------------------
+
+# Teoría Fundamental
+
+## Tipos de Datos y Variables Económicas
+
+::::: columns
+::: {.column width="50%"}
+**Variables Numéricas** - Continuas: Precios (\$100.50), tasas (2.5%) -
+Discretas: Empleados (120), transacciones (5)
+
+**Variables Categóricas** - Nominales: Sector (Finanzas, Retail) -
+Ordinales: Tamaño (Pequeña, Mediana, Grande)
+:::
+
+::: {.column width="50%"}
+**Variables Temporales** - Fechas específicas (2024-01-15) - Períodos
+(trimestral, anual)
+
+**Variables de Texto** - Descripciones, notas, comentarios - Requieren
+limpieza especial
+:::
+:::::
+
+## Clasificación por Escala de Medición
+
+::::: columns
+::: {.column width="50%"}
+**Nominal** - Sin orden, solo categorías - Ej: Finanzas, Retail
+
+**Intervalo** - Diferencias significativas - Ej: Temperatura, Índices
+:::
+
+::: {.column width="50%"}
+**Ordinal** - Con orden jerárquico - Ej: Baja, Media, Alta
+
+**Ratio** - Cero absoluto, ratios válidos - Ej: Precio, Volumen, Ingreso
+:::
+:::::
+
+## Problemas Comunes en Datos Reales
+
+::: block
+### Inconsistencias que Encontrarás
+
+1.  **Fechas**: Múltiples formatos (DD/MM/YYYY, YYYY-MM-DD, texto)
+2.  **Texto**: Espacios extras, mayúsculas inconsistentes
+3.  **Números**: Valores negativos sin justificación, símbolos de moneda
+4.  **Faltantes**: Celdas vacías sin patrón aparente ("NA", "-", " ")
+5.  **Duplicados**: Registros repetidos sin identificación clara
+    ("Finanzas", "FINANZAS", "Finanzas ")
+6.  **Rangos**: Valores fuera del rango esperado
+:::
+
+
+## Fuentes de Datos en Economía
+
+::::: columns
+::: {.column width="50%"}
+**Nacionales**: 
+
+1. Institutos de Estadística: INEI (Perú)
+2. Bancos Centrales: BCRP (Perú)
+3. Entidades gubernamentales: Ministerios, Plataformas gubernamentales.
+4. Insitutos de Estudios Económicos: Instituto Peruano de Economía (IPE)
+:::
+
+::: {.column width="50%"}
+**Internacionales**:
+
+1. Banco Mundial (World Bank): Datos Socioeconómicos.
+2. Fondo Monetario Internacional: Estadísticas Financieras Internacionales. Balanza de Pagos.
+3. Yahoo Finance: Información de instrumentos financieros.
+4. FRED (Federal Reserve Economic Data): Información económica gestionada por la Reserva Federal de Estados Unidos.
+:::
+:::::
+
+##
+
+::: {.callout-note}
+### ¿Los datos que 'importan' solo son Cuantitativos?
+
+No. Todos los datos no son cuantificables al 100%. Existe una gran cantidad de datos que son, por ejemplo, Cualitativos no normalizados. Ejemplo: Sentimientos, Opiniones, Razonamiento, Justificaciones.
+
+**¿Cuál sería la mayor fuente de datos cualitativos?**
+:::
+
+
+
+
+# Gestión de Datos en Excel
+
+## Paso 1: Importar Datos a Excel
+
+### Opción A: Abrir archivo CSV
+
+**Instrucción paso a paso:**
+
+1.  Abre Excel
+2.  Archivo → Abrir
+3.  Selecciona `datos_crudos.csv`
+4.  En el asistente de importación:
+    -   Delimitador: "Comma" (coma)
+    -   Encoding: UTF-8
+    -   Click Finish
+
+### Opción B: Copiar desde otra fuente
+
+1.  Copiar datos
+2.  Excel → Paste → Paste Special
+3.  Seleccionar formato (valores, fórmulas, etc.)
+
+**En archivo Excel**: Ver hoja "Datos Importados"
+
+------------------------------------------------------------------------
+
+## Paso 2: Diagnóstico Visual en Excel
+
+**Instrucciones:**
+
+1.  Abre `Ex_1_1.xlsx`
+2.  Ve a hoja "Datos Crudos" (encabezado ROJO)
+3.  **Observa visualmente** los problemas:
+
+::::: columns
+::: {.column width="50%"}
+-   Fila 2: Fecha formato diferente
+-   Fila 3: Fecha como texto ("1 de enero")
+-   Fila 4: Sector con espacios
+:::
+
+::: {.column width="50%"}
+-   Fila 2: Ingresos negativos (-30000)
+-   Fila 3: Empleados vacío
+-   Fila 4 y 7: Mayúsculas inconsistentes
+:::
+:::::
+
+**Pregunta para reflexión**: ¿Cuántos problemas identificas?
+
+------------------------------------------------------------------------
+
+## Ejercicio 1: Diagnóstico en Excel
+
+**Instrucción:**
+
+1.  Abre `Ex_1_1.xlsx`
+2.  Hoja "Diagnóstico Manual"
+3.  Completa la tabla:
+    -   Problema detectado
+    -   Fila donde ocurre
+    -   Tipo (Fecha, Texto, Número, Faltante)
+    -   Severidad (Baja, Media, Alta)
+
+**Tiempo**: 15 minutos
+
+**Preguntas**: 1. ¿Cuántos problemas encontraste? 2. ¿Cuál es el más
+frecuente? 3. ¿Cuál afectaría más al análisis?
+
+------------------------------------------------------------------------
+
+## Solución - Ejercicio 1
+
+**Problemas principales en Datos Crudos:**
+
+| Tipo                      | Cantidad | Ejemplos                  |
+|---------------------------|----------|---------------------------|
+| Fechas múltiples formatos | 3        | Filas 2, 3, 4             |
+| Espacios en texto         | 2        | Filas 4, 7                |
+| Mayúsculas inconsistentes | 4        | Filas 2, 3, 4, 7          |
+| Ingresos negativos        | 1        | Fila 2                    |
+| Valores faltantes         | 1        | Fila 3, columna Empleados |
+
+**Total de inconsistencias**: 11 problemas en 8 registros
+
+------------------------------------------------------------------------
+
+# Limpieza de Datos en Excel
+
+## Paso 3: Limpiar Nombres de Columnas
+
+**En Excel, esta es una tarea VISUAL:**
+
+1.  Ve a "Datos Crudos"
+2.  Observa los nombres de columnas: ID, fecha, sector, ingresos,
+    empleados
+3.  **Verifica que NO haya**:
+    -   Espacios extras
+    -   Caracteres especiales
+    -   Mayúsculas inconsistentes
+
+**En este caso**: Los nombres ya están limpios ✓
+
+------------------------------------------------------------------------
+
+## Paso 4: Limpiar Texto - TRIM y MAYUS
+
+**El problema**: Espacios y mayúsculas inconsistentes
+
+**Solución en Excel:**
+
+Crea una columna auxiliar con la fórmula:
+
+``` excel
+=MAYUS(TRIM(C2))
+```
+
+Donde: - `TRIM()`: Elimina espacios al inicio y final - `MAYUS()`:
+Convierte a mayúsculas
+
+**Instrucciones paso a paso:**
+
+1.  Abre hoja "Paso_3_Limpiar_Texto" en Excel
+2.  Columna D (auxiliar): Inserta fórmula =MAYUS(TRIM(C2))
+3.  Copia hacia abajo hasta fila 9
+4.  Observa los resultados
+
+------------------------------------------------------------------------
+
+## Ejercicio 2: Limpiar Texto en Excel
+
+**Instrucción:**
+
+1.  Abre `Ex_1_1.xlsx`
+2.  Hoja "Paso_3_Limpiar_Texto"
+3.  Columna D: Aplica =MAYUS(TRIM(C2))
+4.  Copia la fórmula hacia abajo
+5.  Columna E: Copia los resultados limpios
+6.  Compara columna C (sucia) vs E (limpia)
+
+**Tiempo**: 10 minutos
+
+**Preguntas**: 1. ¿La fórmula funcionó? 2. ¿Qué cambió en los datos? 3.
+¿Faltó algo?
+
+------------------------------------------------------------------------
+
+## Solución - Ejercicio 2
+
+**Resultado esperado en Columna E (limpia):**
+
+```         
+FINANZAS
+FINANZAS
+FINANZAS
+FINANZAS
+RETAIL
+RETAIL
+RETAIL
+MANUFACTURA
+```
+
+**Observación**: Todos estandarizados a mayúsculas, sin espacios
+
+**En Excel**: Copia estos valores y pega sobre la columna original
+(Paste Special → Values Only)
+
+------------------------------------------------------------------------
+
+## Paso 5: Convertir Fechas
+
+**El problema**: Fechas en 3 formatos diferentes
+
+```         
+01/01/2024    (DD/MM/YYYY)
+2024-01-02    (YYYY-MM-DD)
+1 de enero    (Texto)
+```
+
+**Solución en Excel:**
+
+1.  Selecciona la columna de fechas
+2.  Data → Text to Columns
+3.  Delimitador: (ninguno)
+4.  Formato de datos: Date → YYYY-MM-DD
+5.  Click Finish
+
+**O manualmente:**
+
+``` excel
+=DATEVALUE(B2)
+```
+
+------------------------------------------------------------------------
+
+## Ejercicio 3: Convertir Fechas en Excel
+
+**Instrucción :**
+
+1.  Abre `Ex_1_1.xlsx`
+2.  Hoja "Paso_4_Convertir_Fechas"
+3.  Selecciona columna B (fechas)
+4.  Data → Text to Columns
+5.  Avanza hasta "Column Data Format"
+6.  Selecciona "Date" → Formato YYYY-MM-DD
+7.  Observa el resultado
+
+**Tiempo**: 10 minutos
+
+**Preguntas**: 1. ¿Todas las fechas se convirtieron? 2. ¿Hay alguna que
+no se convirtió? 3. ¿Por qué?
+
+------------------------------------------------------------------------
+
+## Solución - Ejercicio 3
+
+**Fechas convertidas correctamente:**
+
+```         
+2024-01-01
+2024-01-02
+(ERROR) - No se puede convertir "1 de enero"
+2024-04-01
+...
+```
+
+**Conclusión**: "1 de enero" debe corregirse manualmente a 2024-01-01
+
+**En Excel**: Selecciona esa celda y escribe manualmente la fecha
+
+------------------------------------------------------------------------
+
+## Paso 6: Detectar Valores Faltantes
+
+**En Excel, detectar NA es VISUAL:**
+
+1.  Ve a la hoja "Datos Crudos"
+2.  Columna "empleados"
+3.  Fila 3: Vacía (NA)
+
+**Solución 1 - Usar fórmula CONTAR.BLANCOS:**
+
+``` excel
+=CONTAR.BLANCOS(E2:E9)
+```
+
+Resultado: 1 valor faltante
+
+**Solución 2 - Reemplazar:**
+
+1.  Ctrl+H (Find & Replace)
+2.  Find: (dejar vacío)
+3.  Replace with: NA
+4.  Click Replace All
+
+------------------------------------------------------------------------
+
+## Ejercicio 4: Detectar y Marcar Faltantes en Excel
+
+**Instrucción :**
+
+1.  Abre `Ex_1_1.xlsx`
+2.  Hoja "Datos Crudos"
+3.  Columna F (nueva): =IF(ISBLANK(E2),"FALTANTE","OK")
+4.  Copia hacia abajo
+5.  Observa qué filas tienen FALTANTE
+6.  En la hoja "Problemas", documenta qué hacer
+
+**Tiempo**: 8 minutos
+
+**Decisión (para después)**: - ¿Eliminar la fila? - ¿Imputar con la
+mediana? - ¿Imputar con el promedio?
+
+------------------------------------------------------------------------
+
+## Paso 7: Manejar Valores Negativos
+
+**El problema**: Ingresos negativos (-30000)
+
+**Preguntas a responder PRIMERO:** 1. ¿Es un error de entrada? 2. ¿Es
+una devolución legítima? 3. ¿Es un ajuste contable?
+
+**En Excel - Solución 1: Marcar para revisión**
+
+``` excel
+=IF(D2<0,"REVISAR","OK")
+```
+
+**En Excel - Solución 2: Convertir a positivos**
+
+``` excel
+=ABS(D2)
+```
+
+------------------------------------------------------------------------
+
+## Ejercicio 5: Marcar Valores Negativos en Excel
+
+**Instrucción :**
+
+1.  Abre `Ex_1_1.xlsx`
+2.  Hoja "Datos Crudos"
+3.  Columna G (nueva): =IF(D2\<0,"NEGATIVO","OK")
+4.  Copia hacia abajo
+5.  Observa cuál fila tiene NEGATIVO
+6.  Decide: ¿revisar o convertir a positivo?
+
+**Para este ejemplo**: Convertir a positivo
+
+**Columna H**: =ABS(D2)
+
+**Tiempo**: 8 minutos
+
+------------------------------------------------------------------------
+
+## Paso 8: Crear Variables Derivadas en Excel
+
+**Variables con significado económico:**
+
+``` excel
+Ingresos por Empleado = Ingresos / Empleados
+```
+
+**En Excel:**
+
+1.  Abre `Ex_1_1.xlsx`
+2.  Hoja "Datos Limpios" (encabezado VERDE)
+3.  Columna F: =E2/E2 (Ingresos / Empleados)
+4.  Copia hacia abajo
+5.  Resultado: Eficiencia por empleado
+
+------------------------------------------------------------------------
+
+## Ejercicio 6: Crear Variables Derivadas en Excel
+
+**Instrucción :**
+
+1.  Abre `Ex_1_1.xlsx`
+2.  Hoja "Datos Limpios"
+3.  Columna F: Ingreso por Empleado
+4.  Fórmula: =E2/F2
+5.  Copia hacia abajo hasta fila 9
+6.  Observa los valores calculados
+
+**Preguntas**: 1. ¿Cuál sector tiene mayor eficiencia? 2. ¿Cuál tiene
+menor? 3. ¿Tiene sentido el resultado?
+
+**Tiempo**: 10 minutos
+
+------------------------------------------------------------------------
+
+## Paso 9: Documentar en Excel
+
+**Crear Diccionario de Variables:**
+
+1.  Nueva hoja: "Diccionario"
+2.  Tabla:
+
+| Variable | Descripción | Tipo | Unidad | Rango |
+|---------------|---------------|---------------|---------------|---------------|
+| ID | Identificador único | Numérico | \- | 1-35 |
+| fecha | Fecha transacción | Fecha | YYYY-MM-DD | 2024-01-01 a 2024-06-01 |
+| sector | Sector económico | Texto | \- | Finanzas, Retail, Manufactura |
+| ingresos | Ingresos netos | Numérico | USD | 30000-70000 |
+| empleados | Cantidad de empleados | Numérico | Personas | 90-150 |
+| ingreso_per_capita | Ingresos por empleado | Numérico | USD/Persona | 200-600 |
+
+------------------------------------------------------------------------
+
+## Ejercicio 7: Documentar en Excel
+
+**Instrucción :**
+
+1.  Abre `Ex_1_1.xlsx`
+2.  Crea nueva hoja: "Diccionario"
+3.  Completa la tabla (ver ejemplo anterior)
+4.  Para cada variable:
+    -   Descripción clara
+    -   Tipo de dato
+    -   Unidad de medida
+    -   Rango de valores
+
+**Tiempo**: 15 minutos
+
+**Importancia**: Otros analistas entiendan tus datos
+
+## Ejercicio Aplicativo:
+
+:::: {.block}
+Eres analista en una firma de inversiones ubicada en Miami enfocada en economías emergentes. Te han encargado realizar un análisis rápido de las últimas cotizaciones de Credicorp Ltd. (Ticket: BAP) que han sido extraídas de Investing.com, preparándolos para un análisis financiero posterior.
+:::
+
+
+
+
+
+# Power Query en Excel
+
+## ¿Qué es Power Query?
+
+:::{.block}
+### Definición
+Power Query es el **motor de transformación de datos** integrado en Excel (pestaña Datos → Obtener y Transformar). Permite:
+
+- Importar datos desde múltiples fuentes (CSV, bases de datos, APIs, web)
+- Transformar y limpiar datos sin modificar el archivo original
+- Automatizar procesos repetitivos de preparación
+- Documentar cada paso de transformación de forma auditable
+:::
+
+**Ventaja clave**: Todo lo que hicimos manualmente con fórmulas, Power Query lo hace en un pipeline visual y reproducible.
+
+---
+
+## Power Query vs Fórmulas Manuales
+
+:::{.columns}
+
+:::{.column width="50%"}
+**Fórmulas Manuales**
+
+- =TRIM(C2) celda por celda
+- Columnas auxiliares
+- Difícil auditar
+- Se rompe al cambiar datos
+- No escala
+:::
+
+:::{.column width="50%"}
+**Power Query**
+
+- Transformación en bloque
+- Sin columnas auxiliares
+- Cada paso documentado
+- Se actualiza con Refresh
+- Escala a millones de filas
+:::
+
+:::
+
+---
+
+## Acceder a Power Query
+
+**Instrucciones paso a paso:**
+
+1. Excel → pestaña **Datos**
+2. Sección **Obtener y Transformar Datos**
+3. Click **Desde libro** (si ya tienes Excel)
+4. O **Desde texto/CSV** (si importas)
+5. Se abre el **Editor de Power Query**
+
+El editor tiene 3 paneles:
+
+- Izquierda: Consultas (queries)
+- Centro: Vista previa de datos
+- Derecha: **Pasos aplicados** (el pipeline)
+
+---
+
+## Aplicaciones Económicas de Power Query
+
+:::{.block}
+### ¿Dónde se usa en la práctica?
+1. **Comercio exterior**: Consolidar registros de importaciones/exportaciones mensuales
+2. **Finanzas corporativas**: Unificar estados financieros de subsidiarias en distintas monedas
+3. **Análisis de precios**: Transformar tablas anchas (meses en columnas) a formato largo para análisis
+4. **Indicadores macro**: Extraer datos del Banco Mundial o FMI desde web y estructurarlos
+5. **Consolidación multi-fuente**: Combinar CSVs, hojas Excel y bases de datos en una sola tabla
+:::
+
+## Ejercicio: Limpieza de Datos Educativos Globales (ONU)
+
+:::{.block}
+### Contexto
+Trabajaremos con el dataset **"Datos Educativos Globales"** publicado en Kaggle, extraído del portal de datos de las Naciones Unidas (UN Data). Contiene indicadores educativos (tasas de matriculación, alfabetización, etc.) de múltiples países y años.
+
+
+Supondremos que somos parte del equipo de especialistas de una organización enfocada en analizar la educación primaria en Colombia y Perú. Nos han solicitado obtener un cuadro comparativo con la información sobre la tasa de matrícula Primaria.
+
+Toma el archivo "dataset_edu_ONU.xlsx" y presenta lo solitado para presentar.   
+
+:::
+
+
+## Estructura del Dataset
+**Estructura original (7 columnas):**
+
+| Columna | Descripción |
+|---|---|
+| Índice | Número único por fila |
+| ID | Identificador numérico |
+| País | Nombre del país |
+| Año | Año del registro |
+| Tipo de Dato Educativo | Categoría (matriculación, alfabetización, etc.) |
+| Tasa | Valor numérico del indicador |
+| Fuente de Datos | Origen (ONU) |
+
+
+## Datos Faltantes: ¿Por Qué Importan?
+
+Un **dato faltante** (NA) es una observación que debería existir pero no fue registrada. En Excel aparece como celda vacía.
+
+**Consecuencias si no se tratan:**
+
+- `=PROMEDIO()` ignora vacíos silenciosamente → sesgo invisible
+- Modelos eliminan filas completas → pérdida masiva de información
+- Decisiones basadas en datos incompletos → riesgo financiero
+
+**En la práctica**: Bases de comercio internacional tienen entre 3-8% de campos vacíos. Un dataset de 1000 registros con 6% de faltantes en una columna significa ~60 decisiones tomadas sin información.
+
+---
+
+## Clasificación de Datos Faltantes (Rubin, 1976)
+
+| Tipo | Significado | Ejemplo Comercio Internacional |
+|---|---|---|
+| **MCAR** | Falta por puro azar | Servidor de aduanas se cae 2 horas |
+| **MAR** | Falta por otra variable observable | Empresas pequeñas no reportan volumen |
+| **MNAR** | Falta por el valor mismo | Empresas con aranceles altos los omiten |
+
+**Regla práctica:**
+
+- < 5% y sin patrón → tratar como MCAR
+- Faltantes correlacionan con un grupo → MAR, imputar por grupo
+- Razón lógica para que el valor cause la ausencia → MNAR, documentar
+
+---
+
+## Métodos de Tratamiento
+
+| Método | Cuándo Usarlo | En Excel |
+|---|---|---|
+| **Eliminar filas** | MCAR, < 5% faltantes | Filtrar → Eliminar |
+| **Eliminar columna** | Variable con > 50% vacíos | Eliminar columna |
+| **Media/Mediana global** | MCAR, solución rápida | =IF(ISBLANK(), MEDIAN()) |
+| **Mediana por grupo** | MAR (lo más recomendable) | Fórmula matricial |
+| **Interpolación** | Solo series temporales | Promedio anterior/posterior |
+| **Regresión / KNN / MICE** | MAR complejo, > 20% | Requiere R o Python |
+
+**Advertencia**: Reemplazar con **cero** no es imputar. Cero es un valor; vacío es ausencia de información. Confundirlos distorsiona todo el análisis posterior.
+
+
+## Ejercicio: Limpieza de Datos de Comercio Internacional
+
+:::{.block}
+### Situación
+La gerencia de operaciones recibe mensualmente el archivo `datos_comercio_internacional.csv` con 1020 registros de importaciones y exportaciones de 10 países y 8 sectores. El archivo presenta: duplicados, fechas en múltiples formatos, texto inconsistente (espacios, mayúsculas, códigos ISO), símbolos en campos numéricos ($, %), valores negativos sin justificación, y **datos faltantes entre el 1% y 6%** en 9 de sus 11 columnas.
+:::
+
+**Objetivo**: Usando exclusivamente **Power Query**, entregar una tabla limpia donde: no existan duplicados, todo el texto esté estandarizado, los campos numéricos sean números válidos, y los datos faltantes estén tratados con el método adecuado según su patrón. Documenta cada decisión en el panel de pasos aplicados.
+
+
+
+
+
+# Migración Natural a R
+
+## De Excel a R: Conceptos Paralelos
+
+**Lo que ya sabes en Excel:**
+
+``` excel
+=MAYUS(TRIM(C2))          // Limpiar texto
+=IF(D2<0,"NEG","OK")      // Condicionales
+=E2/F2                     // Operaciones
+=PROMEDIO(E2:E9)          // Funciones
+```
+
+**Lo mismo en R:**
+
+``` r
+str_to_title(str_trim(sector))    # Limpiar texto
+ifelse(ingresos < 0, "NEG", "OK") # Condicionales
+ingresos / empleados              # Operaciones
+mean(ingresos)                    # Funciones
+```
+
+------------------------------------------------------------------------
+
+## ¿Por qué Migrar a R?
+
+::::: columns
+::: {.column width="50%"}
+**Limitaciones de Excel** - Manual (cada fila requiere fórmula) - No
+escala (millones de filas) - Difícil auditar - Difícil reproducir -
+Lento con datos grandes
+:::
+
+::: {.column width="50%"}
+**Ventajas de R** - Automático (aplica a toda columna) - Escala a
+millones de filas - Código transparente - Reproducible al 100% - Muy
+rápido con datos grandes
+:::
+:::::
+
+## Limpieza de Datos en R: Funciones Esenciales
+
+:::{.block}
+### El Ecosistema tidyverse
+R utiliza el paquete **tidyverse** (incluye dplyr, stringr, tidyr) 
+como herramienta principal de limpieza. La lógica es similar a 
+Power Query: un **pipeline** donde cada paso transforma los datos 
+y pasa el resultado al siguiente usando el operador `%>%`.
+:::
+
+```{r intro_pipe, eval=FALSE}
+# El operador %>% (pipe) conecta pasos como Power Query
+datos %>%
+  paso_1() %>%    # Equivale a un "Paso aplicado"
+  paso_2() %>%    # Se ejecuta sobre el resultado anterior
+  paso_3()        # Resultado final
+```
+
+**Lectura**: "Toma datos, LUEGO aplica paso 1, LUEGO paso 2..."
+
+---
+
+## Funciones de Texto (equivalentes a Power Query)
+
+```{r texto, eval=FALSE}
+library(tidyverse)
+
+datos %>% mutate(
+  # Recortar espacios (= Text.Trim)
+  pais = str_trim(pais),
+  
+  # Mayúsculas (= Text.Upper)
+  pais = toupper(pais),
+  
+  # Minúsculas (= Text.Lower)
+  sector = tolower(sector),
+  
+  # Título (= Text.Proper / Mayúscula cada palabra)
+  sector = str_to_title(sector),
+  
+  # Reemplazar texto (= Replacer.ReplaceText)
+  monto = str_remove_all(monto, "\\$"),
+  
+  # Extraer primeros N caracteres (= Text.Start)
+  codigo = str_sub(pais, 1, 2)
+)
+```
+
+---
+
+## Funciones Numéricas y de Filtro
+
+```{r numericas, eval=FALSE}
+datos %>%
+  # Convertir texto a número (= TransformColumnTypes)
+  mutate(monto = as.numeric(monto)) %>%
+  
+  # Valor absoluto (= Number.Abs)
+  mutate(monto = abs(monto)) %>%
+  
+  # Redondear
+  mutate(tasa = round(tasa, 2)) %>%
+  
+  # Filtrar filas (= Table.SelectRows)
+  filter(monto > 0, !is.na(fecha)) %>%
+  
+  # Eliminar duplicados (= Table.Distinct)
+  distinct() %>%
+  
+  # Eliminar duplicados por columna
+  distinct(num_factura, .keep_all = TRUE) %>%
+  
+  # Ordenar (= Table.Sort)
+  arrange(desc(monto))
+```
+
+---
+
+## Funciones para Datos Faltantes
+
+```{r faltantes, eval=FALSE}
+datos %>% mutate(
+  # Reemplazar NA con valor fijo (= ReplaceValue null)
+  arancel = replace_na(arancel, 12.27),
+  empleados = replace_na(empleados, 268),
+  
+  # Reemplazar NA con mediana global
+  volumen = ifelse(is.na(volumen),
+                   median(volumen, na.rm = TRUE),
+                   volumen),
+  
+  # Reemplazar NA con mediana POR GRUPO
+  # (esto NO se puede hacer en Power Query fácilmente)
+  monto = ifelse(is.na(monto),
+                 median(monto, na.rm = TRUE),
+                 monto),
+  .by = sector   # ← calcula mediana dentro de cada sector
+)
+
+# Contar faltantes por columna
+colSums(is.na(datos))
+```
+
+---
+
+## Ejemplo: Pipeline de Limpieza en R
+
+**Lo que hiciste en Excel (9 pasos) en R (5 líneas):**
+
+```{r pipeline_r, eval=FALSE, echo=TRUE, size="tiny"}
+# Cargar datos
+datos <- read.csv("datos_crudos.csv")
+
+# PIPELINE COMPLETO DE LIMPIEZA
+datos_limpios <- datos %>%
+  # Limpiar texto
+  mutate(sector = str_trim(sector) %>% str_to_title()) %>%
+  # Convertir fechas
+  mutate(fecha = as.Date(fecha, format="%Y-%m-%d")) %>%
+  # Marcar negativos
+  mutate(ingreso_negativo = ingresos < 0,
+         ingresos = abs(ingresos)) %>%
+  # Imputar faltantes
+  mutate(empleados = ifelse(is.na(empleados), 
+                            median(empleados, na.rm=TRUE), 
+                            empleados)) %>%
+  # Crear variables derivadas
+  mutate(ingreso_per_capita = ingresos / empleados)
+
+# Resultado: Datos listos para análisis
+head(datos_limpios)
+```
+
+
+## Flujo Natural de Aprendizaje
+
+```         
+PASO 1: Excel (entiendes CÓMO se hace)
+   ↓
+PASO 2: R (entiendes POR QUÉ es mejor)
+   ↓
+PASO 3: Migración (usas R para proyectos grandes)
+   ↓
+PASO 4: Dominio (Excel para exploración, R para producción)
+```
+
+------------------------------------------------------------------------
+
+## Checkpoint: Preguntas de Verificación
+
+Responde internamente:
+
+1.  ¿Cuál es el propósito principal de la limpieza de datos?
+2.  ¿Por qué es importante documentar variables?
+3.  ¿Qué herramienta de Excel usaste para limpiar espacios?
+4.  ¿Qué ventaja tiene R sobre Excel para datos grandes?
+5.  ¿Cuándo usarías Excel y cuándo usarías R?
+
+------------------------------------------------------------------------
+
+## Próxima Sesión
+
+### Sesión 2: Estadística Descriptiva
+
+Ahora con datos limpios, aprenderemos a:
+
+-   Crear tablas de frecuencia
+-   Calcular medidas de tendencia central (media, mediana, moda)
+-   Calcular medidas de dispersión (desviación estándar, IQR)
+-   **Visualizar con gráficos** (histogramas, boxplots)
+-   Interpretar indicadores económicos
+
+**Preparación**: Traer los datos limpios de esta sesión
+
+------------------------------------------------------------------------
+
+## Referencias Bibliográficas
+
+::: block
+### Textos Esenciales
+
+-   Broman, K. W., & Woo, K. H. (2018). "Data organization in
+    spreadsheets." *The American Statistician*, 72(1), 2-10.
+-   Batini, C., Cappiello, C., Francalanci, C., & Maurino, A. (2009).
+    "Methodologies for data quality assessment and improvement." *ACM
+    Computing Surveys*, 41(3), 1-52.
+-   Wickham, H., & Grolemund, G. (2017). *R for Data Science: Import,
+    Tidy, Transform, Visualize, and Model Data*. O'Reilly Media.
+:::
+
+## Recursos en Línea
+
+-   **Microsoft Excel Documentation**:
+    https://support.microsoft.com/en-us/excel
+-   **R Data Wrangling**: https://r4ds.hadley.nz/
+-   **tidyverse Guide**: https://www.tidyverse.org/

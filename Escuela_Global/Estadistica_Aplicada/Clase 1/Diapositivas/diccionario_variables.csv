@@ -1,0 +1,12 @@
+variable,descripcion,tipo,unidad
+id,Identificador único del registro,Numérico,-
+fecha,Fecha de la transacción,Fecha,YYYY-MM-DD
+sector,Sector económico,Categoría,-
+ingresos,Ingresos en USD,Numérico,USD
+empleados,Cantidad de empleados,Numérico,Unidades
+ano,Año de la transacción,Fecha,Años
+mes,Mes de la transacción (1-12),Categoría,Mes
+outlier,Outlier según método IQR,Numérico,-
+ingreso_per_capita,Ingresos por empleado (USD),Numérico,USD/empleado
+categoria_tamaño,Categoría por número de empleados,Lógico,-
+periodo,Período YYYY-MM,Numérico,YYYY-MM

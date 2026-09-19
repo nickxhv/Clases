@@ -1,0 +1,636 @@
+---
+title: "Estadística Descriptiva e Inferencial Aplicada"
+subtitle: "Sesión 2: Limpieza de Datos II y Modelamiento"
+author: "Escuela Global"
+date: "`r Sys.Date()`"
+lang: es
+format:
+  beamer:
+    theme: Warsaw
+    colortheme: whale
+    fonttheme: default
+    navigation: frame
+    toc: false
+    slide-number: true
+    include-in-header:
+      text: |
+        \usepackage{xcolor}
+        \definecolor{EscuelaGlobal}{RGB}{51, 102, 204}
+bibliography: referencias.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, 
+                      message = FALSE, size = 'scriptsize',
+                      fig.align = 'center',
+                      fig.width = 7, fig.height = 4)
+library(tidyverse)
+library(lubridate)
+```
+
+# Introducción
+
+## Contexto: ¿Dónde Estamos?
+
+:::{.block}
+### Sesión Anterior (Sesión 1)
+- Importar datos desde CSV a Excel y R
+- Diagnosticar problemas de calidad (visual y automático)
+- Limpiar texto: TRIM, MAYUS en Excel / `str_trim()`, `toupper()` en R
+- Convertir fechas y manejar valores negativos
+- Crear variables derivadas
+- Introducción a Power Query
+:::
+
+**Hoy**: Técnicas avanzadas de limpieza, tratamiento de datos faltantes y modelamiento de datos para análisis.
+
+---
+
+## Objetivos de Aprendizaje
+
+Al término de esta sesión, el participante será capaz de:
+
+1. Detectar y eliminar registros duplicados en Excel y R
+2. Identificar y tratar valores atípicos (outliers)
+3. Clasificar y tratar datos faltantes según su patrón
+4. Restructurar datos (pivotar, transponer)
+5. Crear modelos de datos relacionales (tablas vinculadas)
+6. Validar la integridad de un dataset limpio
+
+---
+
+# Teoría: Datos Faltantes
+
+## ¿Por Qué Faltan Datos?
+
+:::{.block}
+### Clasificación de Rubin (1976)
+
+| Tipo | Significado | Ejemplo |
+|---|---|---|
+| **MCAR** | Falta por puro azar | Servidor se cae aleatoriamente |
+| **MAR** | Falta por otra variable | Empresas pequeñas no reportan |
+| **MNAR** | Falta por el valor mismo | Aranceles altos se omiten |
+
+:::
+
+**Regla práctica:**
+
+- < 5% faltantes, sin patrón → MCAR → eliminar o mediana global
+- Correlaciona con otra variable → MAR → mediana por grupo
+- Razón lógica para omisión → MNAR → documentar, cautela
+
+---
+
+## Métodos de Tratamiento
+
+| Método | Cuándo | Excel | R |
+|---|---|---|---|
+| Eliminar filas | MCAR, < 5% | Filtrar | `filter(!is.na())` |
+| Eliminar columna | > 50% vacíos | Eliminar col | `select(-col)` |
+| Media/Mediana global | Rápido | `=IF(ISBLANK())` | `replace_na()` |
+| Mediana por grupo | MAR | Fórmula matricial | `group_by + mutate` |
+| Interpolación | Series temporales | Manual | `zoo::na.approx()` |
+| Regresión / KNN | MAR complejo | No viable | `mice`, `VIM` |
+
+**Cuidado**: Reemplazar con **cero** no es imputar. Cero es un valor real; vacío es ausencia de información.
+
+---
+
+## Árbol de Decisión
+
+```
+¿Cuántos faltantes?
+│
+├─ < 5% ───→ Eliminar filas o Mediana global
+│
+├─ 5-20% ──→ ¿Dependen de otra variable?
+│             ├─ NO → Mediana global
+│             └─ SÍ → Mediana por grupo
+│
+├─ 20-40% ─→ Regresión o KNN (requiere R)
+│
+└─ > 40% ──→ Eliminar la columna
+```
+
+---
+
+# Duplicados
+
+## Detectar Duplicados en Excel
+
+**Paso a paso:**
+
+1. Selecciona todo el rango de datos (Ctrl+A)
+2. Inicio → **Formato condicional** → Resaltar reglas de celdas → **Valores duplicados**
+3. Los duplicados se resaltan en rojo
+
+**Para eliminar:**
+
+4. Datos → **Quitar duplicados**
+5. Selecciona columnas de comparación
+6. Excel reporta cuántos eliminó
+
+**Importante**: Decide si comparas TODAS las columnas o solo una clave (ej: num_factura).
+
+---
+
+## Detectar Duplicados en R
+
+```{r dup_demo, eval=TRUE, echo=TRUE}
+# Crear datos de ejemplo con duplicados
+ventas <- tibble(
+  id = c(1, 2, 3, 2, 4, 5, 3),
+  producto = c("A", "B", "C", "B", "D", "E", "C"),
+  monto = c(100, 200, 150, 200, 300, 250, 150)
+)
+
+# Detectar duplicados
+ventas %>% filter(duplicated(.))
+```
+
+```{r dup_eliminar, eval=TRUE, echo=TRUE}
+# Eliminar duplicados completos
+ventas %>% distinct()
+```
+
+```{r dup_por_col, eval=TRUE, echo=TRUE}
+# Eliminar duplicados por columna específica
+ventas %>% distinct(id, .keep_all = TRUE)
+```
+
+---
+
+## Ejercicio 1: Duplicados en Excel y R (70% Excel)
+
+:::{.block}
+### Instrucción
+Abre `datos_comercio_internacional.csv` en Excel. Identifica y elimina duplicados usando dos métodos: primero Formato condicional para visualizar, luego Quitar duplicados para eliminar. Documenta cuántos registros duplicados encontraste y por qué columna los identificaste.
+:::
+
+**En Excel:**
+
+1. Selecciona todas las columnas → Formato condicional → Duplicados
+2. Datos → Quitar duplicados → Selecciona "num_factura"
+3. Anota: ¿Cuántos se eliminaron?
+
+**En R (verificar):**
+
+```{r ej1_r, eval=FALSE}
+datos <- read.csv("datos_comercio_internacional.csv")
+cat("Antes:", nrow(datos), "\n")
+datos <- datos %>% distinct(num_factura, .keep_all = TRUE)
+cat("Después:", nrow(datos), "\n")
+```
+
+---
+
+# Outliers (Valores Atípicos)
+
+## ¿Qué es un Outlier?
+
+:::{.block}
+### Definición
+Un **valor atípico** es una observación que se desvía significativamente del patrón general de los datos. Puede ser un error de entrada o un dato legítimo pero extremo.
+:::
+
+**Métodos de detección:**
+
+| Método | Fórmula | Cuándo |
+|---|---|---|
+| **IQR** | < Q1 - 1.5×IQR o > Q3 + 1.5×IQR | General, robusto |
+| **Z-Score** | \|z\| > 3 | Distribución normal |
+| **Visual** | Boxplot, scatter | Exploratorio |
+
+**Decisión clave**: ¿Eliminar, recortar o documentar?
+
+---
+
+## Detectar Outliers en Excel
+
+**Método IQR paso a paso:**
+
+1. Ordena la columna de interés (ej: monto_usd)
+2. Calcula:
+
+```
+Q1 = CUARTIL(D:D, 1)
+Q3 = CUARTIL(D:D, 3)
+IQR = Q3 - Q1
+Límite inferior = Q1 - 1.5 * IQR
+Límite superior = Q3 + 1.5 * IQR
+```
+
+3. Columna auxiliar:
+
+```
+=IF(OR(D2 < limite_inf, D2 > limite_sup),
+    "OUTLIER", "OK")
+```
+
+4. Filtra "OUTLIER" para revisar
+
+---
+
+## Detectar Outliers en R
+
+```{r outliers_r, eval=TRUE, echo=TRUE}
+# Usar airquality como ejemplo
+data(airquality)
+
+# Método IQR para Ozone
+stats <- airquality %>%
+  filter(!is.na(Ozone)) %>%
+  summarise(
+    Q1 = quantile(Ozone, 0.25),
+    Q3 = quantile(Ozone, 0.75),
+    IQR = Q3 - Q1,
+    lim_inf = Q1 - 1.5 * IQR,
+    lim_sup = Q3 + 1.5 * IQR
+  )
+print(stats)
+```
+
+```{r outliers_marcar, eval=TRUE, echo=TRUE}
+# Marcar outliers
+aire <- airquality %>%
+  filter(!is.na(Ozone)) %>%
+  mutate(
+    es_outlier = Ozone < stats$lim_inf |
+                 Ozone > stats$lim_sup
+  )
+
+cat("Outliers:", sum(aire$es_outlier),
+    "de", nrow(aire), "registros\n")
+```
+
+---
+
+## Ejercicio 2: Outliers (70% Excel)
+
+:::{.block}
+### Instrucción
+En tu archivo de comercio internacional (ya sin duplicados), detecta outliers en la columna `monto_usd` usando el método IQR. Calcula los límites en Excel, marca los outliers con formato condicional y decide qué hacer con ellos.
+:::
+
+**En Excel:**
+
+1. Calcula Q1, Q3, IQR en celdas auxiliares
+2. Columna nueva: =IF(OR(F2<lim_inf, F2>lim_sup), "OUTLIER", "OK")
+3. Formato condicional → Texto que contiene → "OUTLIER" → Rojo
+4. Decide: ¿eliminar, recortar al límite, o documentar?
+
+**Pregunta**: ¿Los outliers son errores (monto × 100) o valores legítimos?
+
+---
+
+# Reestructuración de Datos
+
+## Datos Anchos vs Largos
+
+:::{.columns}
+
+:::{.column width="50%"}
+**Formato ANCHO**
+
+| País | Ene | Feb | Mar |
+|---|---|---|---|
+| Perú | 100 | 120 | 110 |
+| Chile | 80 | 90 | 85 |
+
+Cada período es una columna.
+Ideal para lectura humana.
+:::
+
+:::{.column width="50%"}
+**Formato LARGO**
+
+| País | Mes | Valor |
+|---|---|---|
+| Perú | Ene | 100 |
+| Perú | Feb | 120 |
+| Perú | Mar | 110 |
+| Chile | Ene | 80 |
+
+Cada fila es una observación.
+Ideal para análisis y gráficos.
+:::
+
+:::
+
+**Regla**: ggplot2 y la mayoría de funciones estadísticas requieren formato **largo**.
+
+---
+
+## Pivotar en Excel
+
+**De ancho a largo (Unpivot):**
+
+1. Selecciona la tabla
+2. Datos → Desde tabla/rango (abre Power Query)
+3. Selecciona columnas fijas (ej: País)
+4. Transformar → **Anular dinamización de otras columnas**
+5. Renombra: "Attribute" → "Mes", "Value" → "Valor"
+6. Cerrar y cargar
+
+**De largo a ancho (Pivot):**
+
+1. En Power Query: Transformar → **Columna dinámica**
+2. Valores: selecciona la columna numérica
+3. Función: Suma (o promedio, etc.)
+4. Cerrar y cargar
+
+---
+
+## Pivotar en R
+
+```{r pivot_demo, eval=TRUE, echo=TRUE}
+# Datos anchos (como vienen de Excel)
+ventas_ancho <- tibble(
+  pais = c("Peru", "Chile", "Colombia"),
+  ene = c(100, 80, 90),
+  feb = c(120, 90, 95),
+  mar = c(110, 85, 100)
+)
+print(ventas_ancho)
+```
+
+```{r pivot_largo, eval=TRUE, echo=TRUE}
+# Convertir a formato largo
+ventas_largo <- ventas_ancho %>%
+  pivot_longer(cols = ene:mar,
+               names_to = "mes",
+               values_to = "monto")
+print(ventas_largo)
+```
+
+---
+
+## De Largo a Ancho
+
+```{r pivot_ancho, eval=TRUE, echo=TRUE}
+# Volver a formato ancho
+ventas_largo %>%
+  pivot_wider(names_from = mes,
+              values_from = monto)
+```
+
+**Cuándo usar cada formato:**
+
+- **Ancho**: Reportes para gerencia, tablas Excel
+- **Largo**: Gráficos en ggplot2, modelos estadísticos, análisis en R
+
+---
+
+## Ejercicio 3: Reestructurar Datos (50/50)
+
+:::{.block}
+### Instrucción
+Crea una tabla resumen en Excel con los montos promedio por país y mes (formato ancho). Luego conviértela a formato largo tanto en Power Query como en R. Verifica que ambos resultados sean iguales.
+:::
+
+**En Excel:**
+
+1. Tabla dinámica: Filas = país, Columnas = mes, Valores = promedio(monto)
+2. Copia resultado a nueva hoja
+3. Power Query → Anular dinamización
+
+**En R:**
+
+```{r ej3_r, eval=FALSE}
+resumen <- datos %>%
+  group_by(pais, mes = month(fecha)) %>%
+  summarise(monto_prom = mean(monto_usd, na.rm = TRUE)) %>%
+  pivot_wider(names_from = mes, values_from = monto_prom)
+```
+
+---
+
+# Modelamiento de Datos
+
+## ¿Qué es un Modelo de Datos?
+
+:::{.block}
+### Definición
+Un **modelo de datos** define cómo se organizan, relacionan y almacenan las tablas de un dataset. En análisis económico, permite vincular transacciones con catálogos de países, sectores y tipos de cambio.
+:::
+
+**Ejemplo para nuestro dataset:**
+
+- **Tabla de hechos**: Transacciones (id, fecha, monto, volumen)
+- **Tabla dimensión País**: Código, nombre, región, moneda
+- **Tabla dimensión Sector**: Código, nombre, categoría
+- **Tabla de tipos de cambio**: Moneda, fecha, tasa USD
+
+---
+
+## Modelo Relacional en Excel
+
+**Paso a paso:**
+
+1. Crea hojas separadas para cada tabla:
+   - "Transacciones" (tabla principal)
+   - "Paises" (catálogo)
+   - "Sectores" (catálogo)
+
+2. Vincula con VLOOKUP:
+
+```
+=VLOOKUP(C2, Paises!A:C, 2, FALSE)
+```
+
+Esto trae el nombre del país desde el catálogo usando el código.
+
+3. O usa el **Modelo de datos** de Excel:
+   - Datos → Relaciones → Nueva relación
+   - Tabla: Transacciones, Columna: cod_pais
+   - Tabla relacionada: Paises, Columna: cod_pais
+
+---
+
+## Modelo Relacional en R
+
+```{r modelo_r, eval=TRUE, echo=TRUE}
+# Tabla de hechos
+transacciones <- tibble(
+  id = 1:5,
+  cod_pais = c("PE", "CL", "CO", "PE", "MX"),
+  monto = c(50000, 30000, 45000, 60000, 35000)
+)
+
+# Tabla dimensión
+paises <- tibble(
+  cod_pais = c("PE", "CL", "CO", "MX"),
+  nombre = c("Perú", "Chile", "Colombia", "México"),
+  region = c("Sudamérica", "Sudamérica", 
+             "Sudamérica", "Norteamérica")
+)
+
+# JOIN (equivalente a VLOOKUP)
+transacciones %>%
+  left_join(paises, by = "cod_pais")
+```
+
+---
+
+## Tipos de JOIN
+
+:::{.columns}
+
+:::{.column width="50%"}
+**En Excel:**
+
+- VLOOKUP / XLOOKUP
+- Power Query → Merge
+- Modelo de datos → Relaciones
+
+Solo LEFT JOIN es nativo.
+:::
+
+:::{.column width="50%"}
+**En R:**
+
+```r
+left_join()   # Todo de A + match B
+inner_join()  # Solo coincidencias
+full_join()   # Todo de A y B
+anti_join()   # A sin match en B
+```
+
+Todos los tipos disponibles.
+:::
+
+:::
+
+**`left_join`** es el más usado: conserva todos los registros de la tabla principal y agrega datos del catálogo cuando hay coincidencia.
+
+---
+
+## Ejercicio 4: Crear Modelo de Datos (70% Excel)
+
+:::{.block}
+### Instrucción
+Crea un modelo relacional para el dataset de comercio internacional: una tabla de transacciones, un catálogo de países (con región y moneda) y un catálogo de sectores. Vincula las tablas usando VLOOKUP en Excel y `left_join()` en R.
+:::
+
+**En Excel:**
+
+1. Hoja "Paises": cod_pais, nombre, region, moneda
+2. Hoja "Sectores": cod_sector, nombre, categoria
+3. En "Transacciones": =VLOOKUP(C2, Paises!A:D, 3, FALSE) para traer región
+
+**En R:**
+
+```{r ej4_r, eval=FALSE}
+datos_completos <- datos %>%
+  left_join(paises, by = "cod_pais") %>%
+  left_join(sectores, by = "cod_sector")
+```
+
+---
+
+# Validación Final
+
+## Checklist de Calidad
+
+:::{.block}
+### Protocolo de Validación (6 puntos)
+1. **Duplicados**: 0 registros duplicados
+2. **Faltantes**: 0 NA en variables críticas (documentar imputación)
+3. **Tipos de dato**: Cada columna en su tipo correcto
+4. **Rangos**: Valores dentro de rangos esperados (sin outliers no tratados)
+5. **Consistencia**: Texto estandarizado, fechas en formato único
+6. **Relaciones**: JOINs completos, sin registros huérfanos
+:::
+
+---
+
+## Validación en Excel vs R
+
+:::{.columns}
+
+:::{.column width="50%"}
+**En Excel:**
+
+```
+Duplicados: Quitar duplicados
+Faltantes: =CONTAR.BLANCOS()
+Tipos: Format Cells
+Rangos: =MIN(), =MAX()
+Texto: Filtro → revisar
+```
+
+Manual, visual, limitado.
+:::
+
+:::{.column width="50%"}
+**En R:**
+
+```r
+# Todo en un pipeline
+datos %>%
+  summarise(
+    n = n(),
+    dups = n() - n_distinct(.),
+    nas = sum(is.na(.)),
+    rango = range(monto)
+  )
+```
+
+Automático, reproducible.
+:::
+
+:::
+
+---
+
+## Resumen de la Sesión
+
+**Hoy aprendiste:**
+
+- Detectar y eliminar duplicados (Excel + R)
+- Identificar y tratar outliers con IQR
+- Clasificar datos faltantes (MCAR, MAR, MNAR)
+- Reestructurar datos (ancho ↔ largo)
+- Crear modelos de datos relacionales con JOINs
+- Validar integridad de un dataset
+
+**Flujo profesional completo:**
+
+```
+Importar → Diagnosticar → Limpiar texto →
+Tratar faltantes → Detectar outliers →
+Reestructurar → Modelar → Validar → Exportar
+```
+
+---
+
+## Próxima Sesión
+
+### Sesión 3: Visualización de Tablas y Gráficos
+
+Con datos limpios y modelados, aprenderemos a:
+
+- Crear tablas de frecuencia y tablas cruzadas
+- Construir gráficos profesionales en Excel y ggplot2
+- Elegir el gráfico correcto según tipo de variable
+- Personalizar colores, ejes, etiquetas y temas
+
+**Preparación**: Traer los datos limpios de las Sesiones 1 y 2.
+
+---
+
+## Referencias
+
+:::{.block}
+### Textos Esenciales
+- Wickham, H. & Grolemund, G. (2017). *R for Data Science*. O'Reilly.
+- Kabacoff, R. (2024). *Modern Data Visualization with R*. CRC Press.
+- Broman, K.W. & Woo, K.H. (2018). "Data organization in spreadsheets." *The American Statistician*, 72(1).
+:::
+
+---
+
+*Sesión 2: Limpieza de Datos II y Modelamiento*
+*Escuela Global - Estadística Aplicada*
+*Enfoque: Excel-First, Migración Natural a R*

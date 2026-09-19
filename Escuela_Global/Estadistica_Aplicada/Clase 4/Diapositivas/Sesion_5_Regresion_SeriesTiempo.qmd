@@ -1,0 +1,913 @@
+---
+title: "Estadística Descriptiva e Inferencial Aplicada"
+subtitle: "Sesión 5: Regresión Lineal e Introducción a Series de Tiempo"
+author: "Escuela Global"
+date: "`r Sys.Date()`"
+lang: es
+format:
+  beamer:
+    theme: default
+    colortheme: whale
+    fontsize: 9pt
+    fonttheme: default
+    navigation: frame
+    toc: false
+    slide-number: true
+    include-in-header:
+      text: |
+        \usepackage{xcolor}
+        \usepackage{tikz}
+        \usepackage{pgfplots}
+        \pgfplotsset{compat=1.17}
+        \definecolor{EscuelaGlobal}{RGB}{51, 102, 204}
+        \definecolor{Whale}{RGB}{0, 102, 204}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE,
+                      warning = FALSE, message = FALSE,
+                      size = 'scriptsize')
+```
+
+# Introducción
+
+## De la Inferencia a la Predicción
+
+:::{.block}
+### ¿Dónde Estamos?
+En la Sesión 4 aprendimos a **comparar grupos** (pruebas t) y **estimar promedios** (intervalos de confianza). Hoy damos el siguiente paso: **modelar relaciones** entre variables para explicar y predecir.
+:::
+
+**Dos bloques de la sesión:**
+
+```
+BLOQUE 1: REGRESIÓN LINEAL
+  Datos: ENAHO 2025 - Módulo 500 (corte transversal)
+  Pregunta: ¿Cómo se relaciona el ingreso con la edad,
+            educación y área de residencia?
+        ↓
+BLOQUE 2: SERIES DE TIEMPO
+  Datos: series_peru.dta (PIB, impuestos, comercio 2000-2020)
+  Pregunta: ¿Cómo evolucionan las variables macro en el
+            tiempo y qué podemos pronosticar?
+```
+
+---
+
+## Objetivos de Aprendizaje
+
+Al término de esta sesión, el participante será capaz de:
+
+1. Estimar e interpretar un modelo de regresión lineal simple y múltiple
+2. Evaluar el ajuste del modelo (R², significancia de coeficientes)
+3. Diagnosticar los supuestos del modelo (residuos, normalidad, heterocedasticidad)
+4. Declarar y graficar una serie de tiempo en Stata
+5. Calcular y interpretar autocorrelación (ACF/PACF)
+6. Descomponer una serie en tendencia, estacionalidad y ruido
+7. Generar un pronóstico simple
+
+---
+
+# Parte 1: Regresión Lineal Simple
+
+## ¿Qué es la Regresión Lineal?
+
+:::{.block}
+### Definición
+La regresión lineal modela la relación entre una variable dependiente $Y$ y una o más variables independientes $X$, asumiendo una relación lineal:
+$$Y = \beta_0 + \beta_1 X + \varepsilon$$
+:::
+
+**Componentes:**
+
+- $\beta_0$: intercepto (valor de $Y$ cuando $X=0$)
+- $\beta_1$: pendiente (cambio en $Y$ por cada unidad de $X$)
+- $\varepsilon$: término de error (lo que el modelo no explica)
+
+**Ejemplo económico**: ¿Cómo cambia el ingreso ($Y$) a medida que aumenta la edad ($X$)?
+
+---
+
+## Visualización: La Línea de Mejor Ajuste
+
+\begin{center}
+\includegraphics[width=0.8\textwidth]{img_sesion3/reg_scatter.png}
+\end{center}
+
+La regresión encuentra la línea que **minimiza la suma de los errores al cuadrado** (Mínimos Cuadrados Ordinarios, MCO).
+
+---
+
+## Método de Mínimos Cuadrados Ordinarios (MCO)
+
+:::{.block}
+### La Idea
+MCO elige $\hat{\beta}_0$ y $\hat{\beta}_1$ de forma que minimicen:
+$$\sum_{i=1}^{n} (Y_i - \hat{Y}_i)^2 = \sum_{i=1}^{n} \varepsilon_i^2$$
+:::
+
+**Fórmulas de los estimadores:**
+
+$$\hat{\beta}_1 = \frac{\sum(X_i - \bar{X})(Y_i - \bar{Y})}{\sum(X_i - \bar{X})^2} \qquad \hat{\beta}_0 = \bar{Y} - \hat{\beta}_1 \bar{X}$$
+
+**Supuestos clave (Gauss-Markov):**
+
+1. Relación lineal en los parámetros
+2. Errores con media cero
+3. Homocedasticidad (varianza constante del error)
+4. No autocorrelación de los errores
+5. Errores normalmente distribuidos (para inferencia)
+
+---
+
+## Coeficiente de Determinación: $R^2$
+
+:::{.block}
+### ¿Qué Proporción de la Variación Explica el Modelo?
+$$R^2 = 1 - \frac{\sum(Y_i - \hat{Y}_i)^2}{\sum(Y_i - \bar{Y})^2} = 1 - \frac{SCR}{SCT}$$
+:::
+
+| $R^2$ | Interpretación |
+|---|---|
+| 0.00 - 0.30 | Ajuste débil |
+| 0.30 - 0.60 | Ajuste moderado |
+| 0.60 - 0.90 | Ajuste fuerte |
+| > 0.90 | Ajuste muy fuerte (revisar sobreajuste) |
+
+**Cuidado**: Un $R^2$ alto no implica causalidad, solo asociación lineal.
+
+---
+
+## Regresión Simple en Stata
+
+Código:
+
+```stata
+use "enaho01a-2025-500.dta", clear
+
+** Regresión: ingreso sobre edad
+regress i524a1 p208a
+
+** Interpretar:
+** Coeficiente de p208a = cambio en ingreso por cada
+** año adicional de edad
+** Constante (_cons) = ingreso esperado a edad = 0
+** R-squared = proporción de varianza explicada
+```
+
+**Salida típica:**
+
+```
+      Source |       SS       df    MS
+-------------+----------------------------
+       Model |  1.234e+09   1  1.234e+09
+    Residual |  5.678e+10  798  71152893
+-------------+----------------------------
+       Total |  5.801e+10  799  72602345    R-squared = 0.0213
+
+  i524a1     |   Coef.   Std.Err.    t     P>|t|
+  p208a      |  18.45     3.21      5.75   0.000
+  _cons      |  1050.30   180.5     5.82   0.000
+```
+
+---
+
+## Interpretación de Coeficientes
+
+:::{.block}
+### Modelo Estimado
+$$\widehat{\text{ingreso}} = 1050.30 + 18.45 \times \text{edad}$$
+:::
+
+**Lectura del coeficiente de edad (18.45):**
+
+> "Por cada año adicional de edad, el ingreso esperado aumenta en S/ 18.45, manteniendo todo lo demás constante."
+
+**Lectura de la constante (1050.30):**
+
+> "Una persona de 0 años tendría un ingreso esperado de S/ 1050.30" — interpretación poco útil aquí; la constante rara vez tiene sentido económico directo cuando $X=0$ no es un valor observado en los datos.
+
+**Significancia (p < 0.001)**: El efecto de la edad sobre el ingreso es estadísticamente significativo.
+
+---
+
+## Ejercicio 1: Regresión Simple (70% Stata)
+
+:::{.block}
+### Situación
+La oficina de estudios económicos quiere cuantificar la relación entre edad e ingreso laboral usando la ENAHO 2025.
+:::
+
+**Archivo**: `enaho01a-2025-500.dta`
+
+**Pasos en Stata:**
+
+```stata
+use "enaho01a-2025-500.dta", clear
+regress i524a1 p208a
+```
+
+**Preguntas:**
+
+1. ¿Cuál es el coeficiente de la edad? Interprétalo.
+2. ¿Es significativo al 5%?
+3. ¿Cuál es el $R^2$? ¿El modelo explica mucho o poco?
+4. Predice el ingreso esperado para una persona de 40 años.
+
+---
+
+# Parte 2: Regresión Lineal Múltiple
+
+## Agregar Más Variables Explicativas
+
+:::{.block}
+### Modelo Múltiple
+$$Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_k X_k + \varepsilon$$
+:::
+
+**Ventaja**: Controla por variables que podrían confundir la relación de interés (*ceteris paribus*).
+
+**Ejemplo**: El ingreso puede depender de edad, área de residencia y sector económico simultáneamente.
+
+$$\text{ingreso} = \beta_0 + \beta_1 \text{edad} + \beta_2 \text{area\_urb} + \beta_3 \text{educ} + \varepsilon$$
+
+---
+
+## Variables Categóricas: Dummies
+
+:::{.block}
+### El Problema
+No se puede meter directamente una variable de texto ("Urbano"/"Rural") en una regresión. Se convierte en una **variable dummy** (0/1).
+:::
+
+**En Stata, con `i.` (factor variable):**
+
+```stata
+** Stata crea la dummy automáticamente
+regress i524a1 p208a i.area_res
+
+** Equivalente manual:
+gen urbano = (area_res == 1)
+regress i524a1 p208a urbano
+```
+
+**Interpretación de la dummy**: el coeficiente mide la diferencia promedio respecto a la categoría base (omitida).
+
+---
+
+## Regresión Múltiple en Stata
+
+Código:
+
+```stata
+use "enaho01a-2025-500.dta", clear
+
+gen area_res = .
+replace area_res = 1 if inlist(estrato,1,2,3,4,5)
+replace area_res = 2 if inlist(estrato,6,7,8)
+label define area_lbl 1 "Urbano" 2 "Rural"
+label values area_res area_lbl
+
+** Regresión múltiple con variable categórica
+regress i524a1 p208a i.area_res
+
+** Con interacción edad x área
+regress i524a1 c.p208a##i.area_res
+
+** Ver coeficientes estandarizados (beta)
+regress i524a1 p208a i.area_res, beta
+```
+
+---
+
+## Interpretación del Modelo Múltiple
+
+:::{.block}
+### Modelo Estimado
+$$\widehat{\text{ingreso}} = 850.2 + 15.3\,\text{edad} + 620.5\,\text{Urbano}$$
+:::
+
+**Lectura:**
+
+- **Edad (15.3)**: Por cada año adicional, el ingreso sube S/ 15.3, **controlando por área de residencia**.
+- **Urbano (620.5)**: Los hogares urbanos ganan en promedio S/ 620.5 más que los rurales, **controlando por edad**.
+
+**Nota clave**: El coeficiente de edad cambió de 18.45 (modelo simple) a 15.3 (modelo múltiple) porque parte del efecto de la edad estaba "capturando" también el efecto del área de residencia.
+
+---
+
+## Multicolinealidad
+
+:::{.block}
+### El Problema
+Cuando dos o más variables independientes están altamente correlacionadas entre sí, los coeficientes se vuelven inestables y difíciles de interpretar.
+:::
+
+**Detección en Stata:**
+
+```stata
+regress i524a1 p208a i.area_res
+
+** Factor de Inflación de Varianza (VIF)
+estat vif
+
+** Regla práctica:
+** VIF < 5  → sin problema
+** VIF 5-10 → multicolinealidad moderada
+** VIF > 10 → multicolinealidad severa, revisar modelo
+```
+
+---
+
+## Ejercicio 2: Regresión Múltiple (70% Stata)
+
+:::{.block}
+### Situación
+El área de estudios quiere un modelo más completo que controle por área de residencia además de la edad.
+:::
+
+**Pasos en Stata:**
+
+```stata
+regress i524a1 p208a i.area_res
+estat vif
+```
+
+**Preguntas:**
+
+1. ¿Cambió el coeficiente de edad respecto al modelo simple?
+2. ¿Cuál es la diferencia de ingreso entre Urbano y Rural?
+3. ¿Hay problemas de multicolinealidad (VIF)?
+4. ¿Aumentó el $R^2$ respecto al modelo simple?
+
+---
+
+# Parte 3: Diagnóstico del Modelo
+
+## Verificar los Supuestos: Residuos
+
+:::{.block}
+### ¿Por Qué Diagnosticar?
+Si los supuestos de MCO no se cumplen, los coeficientes pueden ser sesgados o los errores estándar incorrectos, invalidando la inferencia.
+:::
+
+**Gráfico de residuos vs valores ajustados:**
+
+```stata
+regress i524a1 p208a
+rvfplot, yline(0) ///
+    title("Residuos vs Valores Ajustados") ///
+    msize(tiny) mcolor(navy%40)
+```
+
+---
+
+**Qué buscar**: Los puntos deben distribuirse aleatoriamente alrededor de cero, sin patrón (embudo, curva). Un patrón sugiere heterocedasticidad o relación no lineal.
+
+---
+
+## Normalidad de los Residuos
+
+Código:
+
+```stata
+regress i524a1 p208a
+predict residuos, resid
+
+** Histograma con curva normal
+hist residuos, normal ///
+    title("Distribución de los Residuos")
+
+** Gráfico Q-Q
+qnorm residuos, title("Q-Q Plot de Residuos")
+
+** Test formal
+swilk residuos
+```
+
+---
+
+## Q-Q Plot de Residuos: Resultado
+
+\begin{center}
+\includegraphics[width=0.75\textwidth]{img_sesion3/reg_qqresid.png}
+\end{center}
+
+Si los puntos siguen la línea recta, los residuos son aproximadamente normales.
+
+---
+
+## Heterocedasticidad
+
+:::{.block}
+### El Problema
+Ocurre cuando la varianza del error **no es constante** a través de los valores de X. Es común en datos de ingresos (mayor dispersión en ingresos altos).
+:::
+
+**Detección formal en Stata:**
+
+```stata
+regress i524a1 p208a i.area_res
+
+** Test de Breusch-Pagan
+estat hettest
+
+** H0: Varianza constante (homocedasticidad)
+** Si p < 0.05 → Rechazar H0 → Hay heterocedasticidad
+```
+
+**Solución**: Errores estándar robustos:
+
+```stata
+regress i524a1 p208a i.area_res, robust
+```
+
+---
+
+## Ejercicio 3: Diagnóstico (70% Stata)
+
+:::{.block}
+### Situación
+Antes de reportar el modelo múltiple, se debe verificar que cumple los supuestos básicos.
+:::
+
+**Pasos en Stata:**
+
+```stata
+regress i524a1 p208a i.area_res
+predict residuos, resid
+predict ajustados, xb
+
+rvfplot, yline(0)
+hist residuos, normal
+estat hettest
+estat vif
+```
+
+**Preguntas:**
+
+1. ¿Se observa patrón en el gráfico de residuos?
+2. ¿Los residuos parecen normales?
+3. ¿El test de Breusch-Pagan detecta heterocedasticidad?
+4. Si hay heterocedasticidad, vuelve a estimar con `robust`. ¿Cambian mucho los errores estándar?
+
+---
+
+# Parte 4: Series de Tiempo — Fundamentos
+
+## ¿Qué es una Serie de Tiempo?
+
+:::{.block}
+### Definición
+Una serie de tiempo es una secuencia de observaciones de una variable, ordenadas cronológicamente y típicamente espaciadas en intervalos regulares (diario, mensual, trimestral, anual).
+:::
+
+**Dataset de esta sección**: `series_peru.dta`
+
+| Variable | Descripción |
+|---|---|
+| `date` | Trimestre (formato "2000:01" a "2020:04") |
+| `taxes` | Recaudación tributaria |
+| `gdp` | Producto Bruto Interno (PIB) |
+| `exports` | Exportaciones |
+| `imports` | Importaciones |
+
+**84 observaciones trimestrales**: 2000Q1 - 2020Q4 (21 años).
+
+---
+
+## Declarar la Serie de Tiempo en Stata
+
+:::{.block}
+### El Comando `tsset`
+Antes de cualquier análisis de series de tiempo, Stata necesita saber cuál es la variable temporal y su periodicidad.
+:::
+
+Código:
+
+```stata
+use "series_peru.dta", clear
+
+** Convertir la variable date (texto) a formato trimestral
+gen fecha = quarterly(date, "YQ")
+format fecha %tq
+
+** Declarar la serie de tiempo
+tsset fecha
+
+** Verificar
+tsset
+describe
+```
+
+**Salida esperada:**
+```
+Time variable: fecha, 2000q1 to 2020q4
+Delta: 1 quarter
+```
+
+---
+
+## Graficar una Serie de Tiempo
+
+Código:
+
+```stata
+tsset fecha
+
+** Gráfico simple de una serie
+tsline gdp, ///
+    title("PIB trimestral del Perú") ///
+    ytitle("PIB (millones S/)") ///
+    xtitle("") ///
+    lcolor(navy) lwidth(medthick)
+```
+
+---
+
+## PIB en el Tiempo: Resultado
+
+\begin{center}
+\includegraphics[width=0.85\textwidth]{img_sesion3/ts_gdp.png}
+\end{center}
+
+**Observación**: Tendencia creciente con estacionalidad marcada y una caída abrupta en 2020 (pandemia COVID-19).
+
+---
+
+## Graficar Múltiples Series
+
+Código:
+
+```stata
+tsline exports imports, ///
+    title("Comercio Exterior del Perú") ///
+    ytitle("Millones S/") ///
+    legend(order(1 "Exportaciones" 2 "Importaciones")) ///
+    lcolor(navy cranberry)
+```
+
+---
+
+## Comercio Exterior: Resultado
+
+\begin{center}
+\includegraphics[width=0.85\textwidth]{img_sesion3/ts_comercio.png}
+\end{center}
+
+---
+
+## Ejercicio 4: Explorar la Serie (70% Stata)
+
+:::{.block}
+### Situación
+El área de investigación económica necesita un primer diagnóstico visual de las series macroeconómicas antes de modelarlas.
+:::
+
+**Pasos en Stata:**
+
+```stata
+use "series_peru.dta", clear
+gen fecha = quarterly(date, "YQ")
+format fecha %tq
+tsset fecha
+
+tsline gdp
+tsline taxes
+tsline exports imports
+```
+
+**Preguntas:**
+
+1. ¿El PIB muestra tendencia creciente o decreciente?
+2. ¿Se observa estacionalidad (patrón que se repite cada 4 trimestres)?
+3. ¿Qué ocurre en 2020? ¿A qué evento corresponde?
+4. ¿Exportaciones e importaciones se mueven juntas?
+
+---
+
+# Parte 5: Autocorrelación
+
+## ¿Qué es la Autocorrelación?
+
+:::{.block}
+### Definición
+La autocorrelación mide qué tan relacionado está el valor de una serie en el tiempo $t$ con sus propios valores en tiempos pasados ($t-1$, $t-2$, ...).
+$$\rho_k = \text{Corr}(Y_t, Y_{t-k})$$
+:::
+
+**¿Por qué importa?**
+
+- Series económicas casi siempre están autocorrelacionadas (el PIB de hoy se parece al de ayer)
+- Es la base para elegir modelos de pronóstico (AR, MA, ARIMA)
+- Ignorarla en una regresión viola el supuesto de independencia de errores
+
+---
+
+## Función de Autocorrelación (ACF)
+
+Código:
+
+```stata
+tsset fecha
+
+** Correlograma (ACF)
+corrgram gdp, lags(20)
+
+** Gráfico de ACF
+ac gdp, lags(20) ///
+    title("Función de Autocorrelación (ACF)")
+```
+
+---
+
+## ACF del PIB: Resultado
+
+\begin{center}
+\includegraphics[width=0.8\textwidth]{img_sesion3/ts_acf.png}
+\end{center}
+
+**Interpretación**: Barras que superan la banda azul (intervalo de confianza) indican autocorrelación significativa en ese rezago. El decaimiento lento sugiere una tendencia no estacionaria.
+
+---
+
+## Función de Autocorrelación Parcial (PACF)
+
+:::{.block}
+### Diferencia con la ACF
+La PACF mide la correlación entre $Y_t$ y $Y_{t-k}$ **eliminando el efecto de los rezagos intermedios** ($t-1, ..., t-k+1$).
+:::
+
+Código:
+
+```stata
+** Gráfico de PACF
+pac gdp, lags(20) ///
+    title("Función de Autocorrelación Parcial (PACF)")
+```
+
+**Uso práctico**: ACF y PACF juntas ayudan a identificar el orden de un modelo ARIMA(p,d,q).
+
+---
+
+## PACF del PIB: Resultado
+
+\begin{center}
+\includegraphics[width=0.8\textwidth]{img_sesion3/ts_pacf.png}
+\end{center}
+
+---
+
+## Prueba de Estacionariedad: Dickey-Fuller
+
+:::{.block}
+### ¿Por Qué Importa la Estacionariedad?
+Una serie es **estacionaria** si su media, varianza y autocorrelación no cambian en el tiempo. La mayoría de modelos de series de tiempo requieren estacionariedad.
+:::
+
+Código:
+
+```stata
+** Test de Dickey-Fuller Aumentado
+dfuller gdp, lags(4)
+
+** H0: La serie tiene raíz unitaria (NO es estacionaria)
+** Si p > 0.05 → No se rechaza H0 → Serie NO estacionaria
+
+** Si no es estacionaria, diferenciar:
+gen d_gdp = D.gdp
+dfuller d_gdp, lags(4)
+```
+
+---
+
+## Ejercicio 5: Autocorrelación (70% Stata)
+
+:::{.block}
+### Situación
+Antes de construir un modelo de pronóstico, se debe caracterizar la dependencia temporal del PIB.
+:::
+
+**Pasos en Stata:**
+
+```stata
+tsset fecha
+corrgram gdp, lags(12)
+ac gdp, lags(12)
+pac gdp, lags(12)
+dfuller gdp, lags(4)
+```
+
+**Preguntas:**
+
+1. ¿La ACF decae lentamente o rápidamente?
+2. ¿Cuántos rezagos son significativos en la PACF?
+3. Según Dickey-Fuller, ¿la serie es estacionaria?
+4. Si no lo es, aplica primera diferencia y repite el test.
+
+---
+
+# Parte 6: Descomposición y Pronóstico
+
+## Descomposición de una Serie
+
+:::{.block}
+### Componentes de una Serie de Tiempo
+$$Y_t = T_t + S_t + R_t$$
+
+- $T_t$: Tendencia (movimiento de largo plazo)
+- $S_t$: Estacionalidad (patrón que se repite cada período fijo)
+- $R_t$: Residuo (componente aleatorio)
+:::
+
+Código:
+
+```stata
+tsset fecha
+
+** Instalar si es necesario: ssc install stl
+** Descomposición (requiere el paquete stl o tsdecomp)
+tsline gdp, name(original)
+
+** Alternativa nativa: promedio móvil para ver tendencia
+tssmooth ma gdp_tendencia = gdp, window(2 1 1)
+tsline gdp gdp_tendencia
+```
+
+---
+
+## Descomposición Estacional: Resultado
+
+\begin{center}
+\includegraphics[width=0.7\textwidth]{img_sesion3/ts_decompose.png}
+\end{center}
+
+**Lectura**: La tendencia muestra crecimiento sostenido (con la caída de 2020). El componente estacional se repite cada 4 trimestres. El residuo captura choques no explicados.
+
+---
+
+## Introducción a Modelos ARIMA
+
+:::{.block}
+### ARIMA(p, d, q)
+- $p$: orden autorregresivo (AR) — cuántos rezagos de $Y$
+- $d$: orden de diferenciación — cuántas veces diferenciar para lograr estacionariedad
+- $q$: orden de media móvil (MA) — cuántos rezagos del error
+:::
+
+Código:
+
+```stata
+tsset fecha
+
+** Estimar un modelo ARIMA(1,1,1)
+arima gdp, arima(1,1,1)
+
+** Ver los coeficientes AR y MA
+** Verificar significancia de cada término
+```
+
+---
+
+## Generar un Pronóstico
+
+Código:
+
+```stata
+tsset fecha
+
+** Estimar el modelo
+arima gdp, arima(1,1,1)
+
+** Extender el período muestral para pronosticar
+tsappend, add(8)
+
+** Generar el pronóstico con intervalo de confianza
+predict pron_gdp, y dynamic(tq(2021q1))
+predict se_gdp, stdp
+
+** Graficar observado + pronóstico
+tsline gdp pron_gdp, ///
+    title("PIB Observado y Pronosticado") ///
+    legend(order(1 "Observado" 2 "Pronóstico"))
+```
+
+---
+
+## Pronóstico del PIB: Resultado
+
+\begin{center}
+\includegraphics[width=0.85\textwidth]{img_sesion3/ts_forecast.png}
+\end{center}
+
+La zona sombreada representa el intervalo de confianza del pronóstico: la incertidumbre crece cuanto más lejos se pronostica.
+
+---
+
+## Ejercicio 6: Pronóstico (70% Stata)
+
+:::{.block}
+### Situación
+La gerencia de planeamiento necesita una proyección del PIB para los próximos 8 trimestres (2 años).
+:::
+
+**Pasos en Stata:**
+
+```stata
+tsset fecha
+dfuller gdp, lags(4)
+arima gdp, arima(1,1,1)
+tsappend, add(8)
+predict pron_gdp, y dynamic(tq(2021q1))
+tsline gdp pron_gdp
+```
+
+**Preguntas:**
+
+1. ¿El modelo ARIMA(1,1,1) es adecuado según los residuos?
+2. ¿Cuál es el PIB pronosticado para 2021Q1?
+3. ¿El pronóstico captura la recuperación post-pandemia?
+4. Prueba con ARIMA(2,1,1). ¿Mejora el ajuste (AIC/BIC)?
+
+---
+
+# Cierre
+
+## Resumen: Comandos de Regresión
+
+| Tarea | Comando Stata |
+|---|---|
+| Regresión simple | `regress y x` |
+| Regresión múltiple | `regress y x1 x2 i.categorica` |
+| Ver VIF | `estat vif` |
+| Residuos vs ajustados | `rvfplot` |
+| Heterocedasticidad | `estat hettest` |
+| Errores robustos | `regress y x, robust` |
+| Predecir valores | `predict yhat, xb` |
+| Predecir residuos | `predict resid, resid` |
+
+---
+
+## Resumen: Comandos de Series de Tiempo
+
+| Tarea | Comando Stata |
+|---|---|
+| Declarar serie | `tsset variable_tiempo` |
+| Graficar serie | `tsline variable` |
+| Autocorrelación | `ac variable, lags()` |
+| Autocorr. parcial | `pac variable, lags()` |
+| Correlograma | `corrgram variable` |
+| Test de raíz unitaria | `dfuller variable` |
+| Diferenciar | `gen d_var = D.variable` |
+| Modelo ARIMA | `arima variable, arima(p,d,q)` |
+| Pronosticar | `predict, dynamic()` |
+
+---
+
+## Lo que Lograste Hoy
+
+**Regresión Lineal (ENAHO 2025):**
+
+- Estimar e interpretar modelos simples y múltiples
+- Evaluar ajuste ($R^2$) y significancia
+- Diagnosticar residuos, normalidad y heterocedasticidad
+
+**Series de Tiempo (`series_peru.dta`):**
+
+- Declarar y graficar series temporales
+- Calcular e interpretar ACF y PACF
+- Evaluar estacionariedad con Dickey-Fuller
+- Descomponer en tendencia y estacionalidad
+- Generar un pronóstico con ARIMA
+
+---
+
+## Próxima Sesión
+
+### Sesión 6: Modelos Avanzados y Cierre del Curso
+
+- Modelos de elección discreta (logit/probit)
+- Regresión con datos de panel
+- Buenas prácticas de reporte de resultados
+- Proyecto integrador final
+
+**Preparación**: Traer los modelos y pronósticos de esta sesión.
+
+---
+
+## Referencias
+
+:::{.block}
+### Textos Esenciales
+- Wooldridge, J. (2015). *Introductory Econometrics: A Modern Approach*. 6th ed. Cengage.
+- Hamilton, J. (1994). *Time Series Analysis*. Princeton University Press.
+- Stock, J. & Watson, M. (2015). *Introduction to Econometrics*. 3rd ed. Pearson.
+- Palomino, J. (2024). *Curso Stata PUCP*. https://github.com/juanpalominoh/Curso-Stata-PUCP
+- StataCorp. (2023). *Time-Series Reference Manual*. https://www.stata.com/manuals/ts.pdf
+:::
+
+---
+
+*Sesión 5: Regresión Lineal e Introducción a Series de Tiempo*
+*Escuela Global - Estadística Aplicada*
+*Datos: ENAHO 2025 (Módulo 500) y series_peru.dta*

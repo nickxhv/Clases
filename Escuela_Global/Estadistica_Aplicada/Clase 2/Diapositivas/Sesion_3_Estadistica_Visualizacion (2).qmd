@@ -1,0 +1,1287 @@
+---
+title: "Estadística Descriptiva e Inferencial Aplicada"
+subtitle: "Sesión 3: Estadística Descriptiva y Visualización de Datos"
+author: "Escuela Global"
+date: "`r Sys.Date()`"
+lang: es
+format:
+  beamer:
+    fontsize: 9pt
+    theme: default
+    colortheme: whale
+    fonttheme: default
+    navigation: frame
+    toc: false
+    slide-number: true
+    include-in-header:
+      text: |
+        \usepackage{xcolor}
+        \usepackage{tikz}
+        \usepackage{pgfplots}
+        \pgfplotsset{compat=1.17}
+        \definecolor{EscuelaGlobal}{RGB}{51, 102, 204}
+        \definecolor{Whale}{RGB}{0, 102, 204}
+---
+
+```{r setup, include=FALSE}
+# eval=FALSE: los chunks muestran el código pero no se ejecutan
+# echo=fenced (por chunk): muestra el bloque ```{r} completo
+#   para que el estudiante pueda copiar el chunk entero
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE,
+                      warning = FALSE, message = FALSE,
+                      size = 'tiny')
+```
+
+# Introducción
+
+## ¿Qué es la Estadística Descriptiva?
+
+:::{.block}
+### Definición
+La **estadística descriptiva** resume y organiza las características principales de un conjunto de datos mediante tablas, medidas numéricas y gráficos, sin extraer conclusiones más allá de los datos observados.
+:::
+
+**Dos grandes tareas:**
+
+1. **Resumir con números**: medidas de tendencia central, dispersión y posición
+2. **Comunicar visualmente**: tablas y gráficos que revelan patrones
+
+**Hoy**: dominamos ambas en Excel y R.
+
+---
+
+## Objetivos de Aprendizaje
+
+Al término de esta sesión, el participante será capaz de:
+
+1. Calcular medidas de tendencia central y dispersión en Excel y R
+2. Construir tablas de frecuencia y tablas resumen profesionales
+3. Elegir el gráfico correcto según el tipo de variable
+4. Crear gráficos estadísticos en Excel
+5. Crear gráficos con ggplot2 en R
+6. Producir tablas publicables con el paquete `gt`
+
+---
+
+# Medidas Estadísticas
+
+## Medidas de Tendencia Central
+
+:::{.columns}
+
+:::{.column width="55%"}
+\begin{tikzpicture}
+\begin{axis}[
+    width=6cm, height=4.5cm,
+    ybar, bar width=8pt,
+    xlabel={Valor}, ylabel={Frecuencia},
+    xtick={1,2,3,4,5,6,7},
+    ymin=0, xmin=0, xmax=8,
+    axis lines=left,
+    tick label style={font=\tiny},
+    label style={font=\tiny}
+]
+\addplot[fill=Whale, draw=white] coordinates {
+    (1,2) (2,4) (3,7) (4,9) (5,6) (6,3) (7,1)
+};
+\draw[red, thick, dashed] (axis cs:4,0) -- (axis cs:4,9);
+\end{axis}
+\end{tikzpicture}
+:::
+
+:::{.column width="45%"}
+**Media**
+Promedio aritmético.
+Sensible a outliers.
+
+**Mediana**
+Valor central.
+Robusta a outliers.
+
+**Moda**
+Valor más frecuente.
+Útil en categóricas.
+:::
+
+:::
+
+**Regla**: Si la distribución es simétrica, media ≈ mediana. Si está sesgada, usar mediana.
+
+---
+
+## Medidas de Dispersión
+
+:::{.columns}
+
+:::{.column width="50%"}
+**Rango**
+Máximo menos mínimo.
+
+**Varianza**
+Promedio de desviaciones al cuadrado.
+
+**Desviación estándar**
+Raíz de la varianza.
+Misma unidad que los datos.
+:::
+
+:::{.column width="50%"}
+**Rango intercuartílico (IQR)**
+Q3 menos Q1.
+Robusto a outliers.
+
+**Coeficiente de variación (CV)**
+Desv. estándar / media.
+Compara dispersión relativa.
+:::
+
+:::
+
+**Fórmula de la desviación estándar muestral:**
+
+$$s = \sqrt{\frac{1}{n-1}\sum_{i=1}^{n}(x_i - \bar{x})^2}$$
+
+---
+
+## Dispersión: Comparación Visual
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    width=9cm, height=5cm,
+    xlabel={Valor}, ylabel={Densidad},
+    ymin=0, xmin=-6, xmax=6,
+    axis lines=left,
+    legend style={font=\tiny, at={(0.98,0.98)}},
+    tick label style={font=\tiny},
+    label style={font=\small}
+]
+\addplot[Whale, thick, samples=100, domain=-6:6] 
+    {exp(-x^2/2)/sqrt(2*pi)};
+\addlegendentry{Baja dispersión ($s=1$)}
+\addplot[orange, thick, samples=100, domain=-6:6] 
+    {exp(-x^2/8)/sqrt(8*pi)};
+\addlegendentry{Alta dispersión ($s=2$)}
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+Ambas distribuciones tienen la **misma media** (0) pero **distinta dispersión**. La desviación estándar captura esa diferencia.
+
+---
+
+## Medidas de Posición
+
+:::{.block}
+### Cuartiles y Percentiles
+- **Q1** (percentil 25): 25% de los datos por debajo
+- **Q2** (mediana, percentil 50): 50% por debajo
+- **Q3** (percentil 75): 75% por debajo
+- **Percentil k**: k% de los datos por debajo
+:::
+
+\begin{center}
+\begin{tikzpicture}
+\draw[thick] (0,0) -- (10,0);
+\foreach \x/\l in {0/mín, 2.5/Q1, 5/Mediana, 7.5/Q3, 10/máx} {
+    \draw[thick] (\x,-0.15) -- (\x,0.15);
+    \node[font=\tiny, below] at (\x,-0.2) {\l};
+}
+\draw[Whale, line width=8pt] (2.5,0.6) -- (7.5,0.6);
+\node[font=\tiny] at (5,1.0) {IQR = Q3 - Q1};
+\end{tikzpicture}
+\end{center}
+
+El boxplot es la representación visual de estas cinco medidas.
+
+---
+
+## Anatomía de un Boxplot
+
+\begin{center}
+\begin{tikzpicture}
+% Caja
+\draw[fill=Whale!30, draw=Whale, thick] (2,1) rectangle (6,3);
+% Mediana
+\draw[red, very thick] (4,1) -- (4,3);
+% Bigotes
+\draw[thick] (2,2) -- (0.5,2);
+\draw[thick] (6,2) -- (8,2);
+\draw[thick] (0.5,1.6) -- (0.5,2.4);
+\draw[thick] (8,1.6) -- (8,2.4);
+% Outlier
+\fill[red] (9.2,2) circle (3pt);
+% Etiquetas
+\node[font=\tiny, below] at (0.5,1.5) {Mín};
+\node[font=\tiny, below] at (2,0.9) {Q1};
+\node[font=\tiny, below] at (4,0.9) {Mediana};
+\node[font=\tiny, below] at (6,0.9) {Q3};
+\node[font=\tiny, below] at (8,1.5) {Máx};
+\node[font=\tiny, below] at (9.2,1.6) {Outlier};
+\end{tikzpicture}
+\end{center}
+
+El boxplot muestra de un vistazo: centro, dispersión, asimetría y valores atípicos.
+
+---
+
+# Parte 1: Estadística en Excel
+
+## Funciones Estadísticas en Excel
+
+| Medida | Función Excel |
+|---|---|
+| Media | `=PROMEDIO(rango)` |
+| Mediana | `=MEDIANA(rango)` |
+| Moda | `=MODA.UNO(rango)` |
+| Desviación estándar | `=DESVEST.M(rango)` |
+| Varianza | `=VAR.M(rango)` |
+| Mínimo / Máximo | `=MIN(rango)` / `=MAX(rango)` |
+| Cuartil | `=CUARTIL.INC(rango, 1)` |
+| Percentil | `=PERCENTIL.INC(rango, 0.9)` |
+| Conteo | `=CONTAR(rango)` |
+
+**Tip**: `=CUARTIL.INC(A:A, 2)` da la mediana; es equivalente a `=MEDIANA(A:A)`.
+
+---
+
+## Resumen Automático en Excel
+
+**Herramienta de Análisis de Datos:**
+
+1. Archivo → Opciones → Complementos
+2. Administrar: Complementos de Excel → Ir
+3. Marca "Herramientas para análisis" → Aceptar
+4. Datos → **Análisis de datos** → Estadística descriptiva
+5. Rango de entrada: selecciona tu columna
+6. Marca "Resumen de estadísticas"
+7. Aceptar
+
+**Resultado**: Excel genera media, error típico, mediana, moda, desviación, varianza, curtosis, asimetría, rango, mín, máx, suma y cuenta — todo de una vez.
+
+---
+
+## Tabla Dinámica para Estadísticas
+
+**Paso a paso:**
+
+1. Selecciona tus datos
+2. Insertar → Tabla dinámica
+3. Filas: variable categórica (ej: sector)
+4. Valores: variable numérica (ej: monto)
+5. Click en el campo de Valores → Configuración
+6. Elige: Promedio, Recuento, Máx, Mín, Desv. Est.
+
+**Repite** arrastrando la misma variable numérica varias veces al área de Valores, cada una con una función distinta. Así obtienes una tabla resumen completa por grupo.
+
+---
+
+## Ejercicio 1: Estadística Descriptiva en Excel
+
+:::{.block}
+### Situación
+Recibes el archivo `ventas_sectores.xlsx` con transacciones de 5 sectores económicos. La gerencia pide un informe con las estadísticas descriptivas de los montos por sector.
+:::
+
+**Objetivo**: Crear una tabla resumen con media, mediana, desviación estándar y coeficiente de variación por sector, e identificar qué sector tiene mayor variabilidad relativa.
+
+**Pasos principales:**
+
+1. Abre `ventas_sectores.xlsx`
+2. Tabla dinámica: Filas = sector, Valores = monto (Promedio, Mediana vía Máx no aplica → usa fórmulas)
+3. Columna CV = Desv. Est. / Media
+4. Ordena por CV descendente
+5. Compara con `ventas_sectores_RESUELTO.xlsx`
+
+---
+
+# Parte 2: Gráficos en Excel
+
+## Elegir el Gráfico Correcto
+
+| Pregunta | Variables | Gráfico Excel |
+|---|---|---|
+| ¿Cómo se distribuye? | 1 numérica | Histograma |
+| ¿Cuántos por categoría? | 1 categórica | Barras / Columnas |
+| ¿Proporción del total? | 1 categórica | Circular |
+| ¿Varía entre grupos? | Cat × Num | Barras agrupadas |
+| ¿Se relacionan? | Num × Num | Dispersión (XY) |
+| ¿Cambia en el tiempo? | Temporal | Líneas |
+
+---
+
+## Crear un Histograma en Excel
+
+**Paso a paso:**
+
+1. Selecciona la columna numérica
+2. Insertar → Gráficos → **Histograma**
+3. Click derecho en el eje X → Dar formato al eje
+4. Ajusta "Ancho del contenedor" (bin width)
+5. Personaliza título y etiquetas
+
+**Alternativa con Análisis de Datos:**
+
+1. Datos → Análisis de datos → Histograma
+2. Rango de entrada + Rango de clases
+3. Marca "Crear gráfico"
+
+---
+
+## Buenas Prácticas en Gráficos Excel
+
+:::{.columns}
+
+:::{.column width="50%"}
+**Hacer**
+
+- Título descriptivo
+- Ejes con unidades
+- Ordenar barras por valor
+- Colores consistentes
+- Eliminar líneas de cuadrícula sobrantes
+:::
+
+:::{.column width="50%"}
+**Evitar**
+
+- Gráficos 3D
+- Ejes que no inician en cero (barras)
+- Demasiadas categorías en circular
+- Colores similares
+- Efectos de sombra o brillo
+:::
+
+:::
+
+---
+
+## Ejercicio 2: Gráficos en Excel
+
+:::{.block}
+### Situación
+Con el archivo `comercio_paises.xlsx` (montos de exportación de 8 países durante 24 meses), el equipo comercial necesita un tablero visual básico.
+:::
+
+**Objetivo**: Producir tres gráficos profesionales que respondan: (a) ¿qué país exporta más?, (b) ¿cómo evolucionan las exportaciones en el tiempo?, (c) ¿hay relación entre monto y volumen?
+
+**Pasos principales:**
+
+1. Abre `comercio_paises.xlsx`
+2. Gráfico de barras: total por país (ordenado de mayor a menor)
+3. Gráfico de líneas: exportaciones mensuales
+4. Gráfico de dispersión: monto vs volumen + línea de tendencia
+5. Compara con `comercio_paises_RESUELTO.xlsx`
+
+---
+
+# Parte 3: Estadística y Gráficos en Stata
+
+## ¿Por Qué Stata?
+
+:::{.block}
+### El Software del Análisis Económico Aplicado
+Stata es el estándar en economía, políticas públicas y ciencias sociales. Su fortaleza: comandos concisos, reproducibilidad vía archivos `.do` y manejo eficiente de grandes encuestas (ENAHO, ENDES, censos).
+:::
+
+**Filosofía de Stata:**
+
+- Un comando = una acción (`summarize`, `histogram`, `graph bar`)
+- Los análisis se guardan en un archivo `.do` (reproducible)
+- La sintaxis es uniforme: `comando variable, opciones`
+
+**Referencia**: Curso Stata PUCP (J. Palomino) y Manual oficial de Stata (`[U] User's Guide`).
+
+---
+
+## Estructura de un Comando en Stata
+
+:::{.block}
+### Sintaxis General
+:::
+
+```stata
+comando [varlist] [if] [in] [weight] [, opciones]
+```
+
+**Ejemplos:**
+
+```stata
+summarize ingreso                    // resumen básico
+summarize ingreso if edad > 25       // con condición
+histogram ingreso, frequency         // con opción
+graph bar (mean) ingreso, over(region)
+```
+
+**Elementos:**
+
+- `varlist`: lista de variables
+- `if` / `in`: filtrar observaciones
+- `,`: separa el comando de sus opciones
+
+---
+
+## Cargar Datos en Stata
+
+Código (extraíble):
+
+```stata
+* Datos de ejemplo incluidos en Stata
+sysuse auto, clear
+
+* Datos desde archivo propio
+use "datos_comercio.dta", clear
+
+* Importar desde Excel
+import excel "ventas.xlsx", firstrow clear
+
+* Importar desde CSV
+import delimited "datos.csv", clear
+
+* Ver estructura
+describe
+```
+
+**`clear`** limpia la memoria antes de cargar. **`firstrow`** indica que la primera fila son nombres de variables.
+
+---
+
+# Estadística Descriptiva en Stata
+
+## Comandos de Resumen
+
+Código (extraíble):
+
+```stata
+* Resumen básico: media, desv, min, max
+summarize ingreso
+
+* Resumen detallado: percentiles, asimetría, curtosis
+summarize ingreso, detail
+
+* Resumen de varias variables
+summarize ingreso edad empleados
+```
+
+`summarize` (abreviado `su`) es el comando central de estadística descriptiva. Con `detail` agrega mediana, percentiles, varianza, asimetría y curtosis.
+
+---
+
+## Tablas de Estadísticas: tabstat
+
+Código (extraíble):
+
+```stata
+* Tabla de estadísticas personalizada
+tabstat ingreso, ///
+    statistics(mean median sd min max n) ///
+    columns(statistics)
+
+* Estadísticas POR GRUPO
+tabstat ingreso, ///
+    by(region) ///
+    statistics(mean sd n)
+```
+
+**`tabstat`** es el comando estrella para tablas descriptivas. La opción `by()` genera estadísticas por grupo, equivalente a una tabla dinámica de Excel o `group_by()` de R.
+
+---
+
+## Tablas de Frecuencia
+
+Código (extraíble):
+
+```stata
+* Frecuencia de una variable categórica
+tabulate region
+
+* Tabla cruzada de dos variables
+tabulate region sexo
+
+* Tabla cruzada con porcentajes por fila
+tabulate region sexo, row
+
+* Con porcentajes por columna
+tabulate region sexo, column
+```
+
+**`tabulate`** (abreviado `tab`) crea tablas de frecuencia. Con dos variables genera tablas cruzadas. Las opciones `row`, `column` y `cell` añaden porcentajes.
+
+---
+
+## Tabla de Resultado: tabstat
+
+\begin{center}
+\includegraphics[width=0.95\textwidth]{img_sesion3/stata_tabla.png}
+\end{center}
+
+Salida típica de `tabstat ingreso, by(region) statistics(mean sd min max n)`.
+
+---
+
+## Ejercicio 3: Estadística en Stata
+
+:::{.block}
+### Situación
+Con la base `ventas_sectores.dta` (convertida desde el Excel de la Sesión), el área de estudios necesita un reporte descriptivo reproducible en un archivo `.do`.
+:::
+
+**Objetivo**: Escribir un `.do` que calcule media, mediana, desviación y N por sector, e identifique el sector con mayor dispersión.
+
+**Pasos principales:**
+
+1. `import excel "ventas_sectores.xlsx", firstrow clear`
+2. `tabstat monto_usd, by(sector) statistics(mean median sd n)`
+3. Interpretar qué sector tiene mayor desviación estándar
+4. Guardar el log: `log using "reporte.log"`
+
+---
+
+# Gráficos en Stata
+
+## Gráficos Univariados: Histograma
+
+Código (extraíble):
+
+```stata
+* Histograma básico
+histogram ingreso
+
+* Con frecuencia en lugar de densidad
+histogram ingreso, frequency
+
+* Personalizado
+histogram ingreso, ///
+    frequency ///
+    title("Histograma del ingreso") ///
+    xtitle("Ingreso (soles)") ///
+    color(navy)
+```
+
+El operador `///` permite escribir un comando largo en varias líneas dentro de un `.do`.
+
+---
+
+## Histograma: Resultado
+
+\begin{center}
+\includegraphics[width=0.8\textwidth]{img_sesion3/stata_histograma.png}
+\end{center}
+
+---
+
+## Gráfico de Barras
+
+Código (extraíble):
+
+```stata
+* Barras con la media por categoría
+graph bar (mean) ingreso, ///
+    over(region) ///
+    title("Ingreso promedio por región") ///
+    ytitle("Ingreso (soles)") ///
+    bar(1, color(navy))
+
+* Barras con conteo
+graph bar (count), over(region)
+```
+
+**`graph bar`** requiere una estadística `(mean)`, `(sum)`, `(count)`, etc. y la variable de agrupación en `over()`.
+
+---
+
+## Barras: Resultado
+
+\begin{center}
+\includegraphics[width=0.8\textwidth]{img_sesion3/stata_barras.png}
+\end{center}
+
+---
+
+## Box Plot
+
+Código (extraíble):
+
+```stata
+* Boxplot por grupo
+graph box ingreso, ///
+    over(region) ///
+    title("Distribución del ingreso por región") ///
+    ytitle("Ingreso (soles)")
+
+* Boxplot de varias variables
+graph box ingreso gasto
+```
+
+**`graph box`** genera diagramas de caja. Con `over()` compara la distribución entre grupos, mostrando mediana, cuartiles y outliers.
+
+---
+
+## Box Plot: Resultado
+
+\begin{center}
+\includegraphics[width=0.8\textwidth]{img_sesion3/stata_boxplot.png}
+\end{center}
+
+---
+
+## Gráficos Bivariados: twoway
+
+Código (extraíble):
+
+```stata
+* Dispersión simple
+twoway scatter ingreso edad
+
+* Dispersión + línea de ajuste
+twoway (scatter ingreso edad) ///
+       (lfit ingreso edad), ///
+    title("Ingreso según edad") ///
+    xtitle("Edad (años)") ///
+    ytitle("Ingreso (soles)")
+```
+
+**`twoway`** es el comando más potente de Stata: combina capas gráficas (scatter, line, lfit, etc.) entre paréntesis. `lfit` añade la línea de regresión lineal.
+
+---
+
+## Scatter + Ajuste: Resultado
+
+\begin{center}
+\includegraphics[width=0.8\textwidth]{img_sesion3/stata_scatter.png}
+\end{center}
+
+---
+
+## Barras Agrupadas
+
+Código (extraíble):
+
+```stata
+* Barras por dos categorías
+graph bar (mean) ingreso, ///
+    over(sexo) ///
+    over(region) ///
+    title("Ingreso por región y sexo") ///
+    legend(order(1 "Hombres" 2 "Mujeres"))
+
+* Con asignación de color por grupo
+graph bar (mean) ingreso, ///
+    over(region) asyvars over(sexo)
+```
+
+El orden de los `over()` define la jerarquía de agrupación. `asyvars` colorea las barras según la primera variable.
+
+---
+
+## Barras Agrupadas: Resultado
+
+\begin{center}
+\includegraphics[width=0.8\textwidth]{img_sesion3/stata_barras_grupo.png}
+\end{center}
+
+---
+
+## Guardar y Exportar Gráficos
+
+Código (extraíble):
+
+```stata
+* Guardar el gráfico en formato Stata
+graph save "grafico.gph", replace
+
+* Exportar como imagen
+graph export "grafico.png", replace width(1200)
+
+* Exportar como PDF
+graph export "grafico.pdf", replace
+
+* Nombrar un gráfico en memoria
+histogram ingreso, name(hist1, replace)
+```
+
+**`graph export`** admite PNG, PDF, EPS, SVG y TIF. La opción `width()` controla la resolución en píxeles.
+
+---
+
+## Esquemas Visuales (Schemes)
+
+Código (extraíble):
+
+```stata
+* Cambiar el estilo visual global
+set scheme s2color      // clásico (por defecto)
+set scheme s1mono       // monocromático
+set scheme economist    // estilo The Economist
+
+* Aplicar a un gráfico puntual
+histogram ingreso, scheme(economist)
+```
+
+Los **schemes** controlan la apariencia global (colores, fondo, fuentes). Para gráficos profesionales, el paquete `grstyle` (Jann) permite personalización avanzada.
+
+---
+
+## Ejercicio 4: Gráficos en Stata
+
+:::{.block}
+### Situación
+Con la base de comercio internacional, el equipo necesita un tablero visual reproducible en un `.do`.
+:::
+
+**Objetivo**: Producir tres gráficos (histograma, barras por país, dispersión monto-volumen) y exportarlos como PNG.
+
+**Pasos principales:**
+
+1. `import delimited "datos_comercio.csv", clear`
+2. Histograma: `histogram monto_usd, frequency title("...")`
+3. Barras: `graph bar (mean) monto_usd, over(pais)`
+4. Dispersión: `twoway (scatter monto_usd volumen_ton) (lfit monto_usd volumen_ton)`
+5. Exportar cada uno: `graph export "g1.png", replace`
+
+---
+
+## Resumen: Comandos Clave de Stata
+
+| Tarea | Comando Stata |
+|---|---|
+| Resumen estadístico | `summarize var, detail` |
+| Tabla por grupo | `tabstat var, by(g) stat(...)` |
+| Frecuencias | `tabulate var` |
+| Tabla cruzada | `tabulate v1 v2, row` |
+| Histograma | `histogram var` |
+| Barras | `graph bar (mean) var, over(g)` |
+| Boxplot | `graph box var, over(g)` |
+| Dispersión | `twoway scatter y x` |
+| Ajuste lineal | `twoway lfit y x` |
+| Exportar | `graph export "f.png", replace` |
+
+---
+
+
+# Parte 4: Visualización en R
+
+## ¿Por Qué ggplot2?
+
+:::{.block}
+### La Gramática de Gráficos
+`ggplot2` construye gráficos por **capas**. Cada gráfico se arma sumando componentes con `+`, lo que da consistencia y flexibilidad ilimitada.
+:::
+
+**Estructura básica** (extraíble del Beamer):
+
+```{r}
+#| echo: fenced
+#| eval: false
+library(ggplot2)
+
+ggplot(datos, aes(x = variable_x, y = variable_y)) +
+  geom_tipo() +          # geometría: puntos, barras, etc.
+  labs(title = "...") +  # títulos y etiquetas
+  theme_minimal()        # tema visual
+```
+
+**Lectura**: "Toma los datos, mapea X e Y, dibuja la geometría, añade títulos, aplica tema."
+
+---
+
+## Preparar Datos y Paleta
+
+```{r}
+#| echo: fenced
+#| eval: false
+library(tidyverse)
+
+# Paleta institucional Whale
+whale <- c("#0066CC", "#3366FF", "#6699FF",
+           "#FF6633", "#228B22")
+
+# Dataset de ejemplo (nativo de R)
+data(mpg, package = "ggplot2")
+
+# Tema personalizado reutilizable
+tema_escuela <- theme_minimal(base_size = 11) +
+  theme(
+    plot.title = element_text(face = "bold"),
+    legend.position = "bottom",
+    panel.grid.minor = element_blank()
+  )
+```
+
+---
+
+## Histograma en ggplot2
+
+Código (extraíble):
+
+```{r}
+#| echo: fenced
+#| eval: false
+ggplot(mpg, aes(x = hwy)) +
+  geom_histogram(fill = "#0066CC",
+                 color = "white",
+                 bins = 25) +
+  labs(title = "Distribución de Eficiencia",
+       x = "Millas por galón (hwy)",
+       y = "Frecuencia") +
+  theme_minimal()
+```
+
+---
+
+## Histograma: Resultado
+
+\begin{center}
+\includegraphics[width=0.85\textwidth]{img_sesion3/histograma.png}
+\end{center}
+
+---
+
+## Boxplot en ggplot2
+
+Código (extraíble):
+
+```{r}
+#| echo: fenced
+#| eval: false
+ggplot(mpg, aes(x = reorder(class, hwy, median),
+                y = hwy, fill = class)) +
+  geom_boxplot(show.legend = FALSE,
+               alpha = 0.7) +
+  labs(title = "Eficiencia por Clase de Vehículo",
+       x = "Clase",
+       y = "Millas por galón (hwy)") +
+  scale_fill_brewer(palette = "Blues") +
+  theme_minimal()
+```
+
+---
+
+## Boxplot: Resultado
+
+\begin{center}
+\includegraphics[width=0.85\textwidth]{img_sesion3/boxplot.png}
+\end{center}
+
+---
+
+## Gráfico de Barras en ggplot2
+
+Código (extraíble):
+
+```{r}
+#| echo: fenced
+#| eval: false
+mpg %>%
+  count(class) %>%
+  ggplot(aes(x = reorder(class, -n), y = n)) +
+  geom_bar(stat = "identity",
+           fill = "#0066CC") +
+  geom_text(aes(label = n), vjust = -0.5,
+            size = 3) +
+  labs(title = "Vehículos por Clase",
+       x = "", y = "Cantidad") +
+  theme_minimal()
+```
+
+---
+
+## Barras: Resultado
+
+\begin{center}
+\includegraphics[width=0.85\textwidth]{img_sesion3/barras.png}
+\end{center}
+
+---
+
+## Densidad por Grupo
+
+Código (extraíble):
+
+```{r}
+#| echo: fenced
+#| eval: false
+ggplot(mpg, aes(x = hwy, fill = drv)) +
+  geom_density(alpha = 0.4) +
+  labs(title = "Densidad de Eficiencia por Tracción",
+       x = "Millas por galón (hwy)",
+       fill = "Tracción") +
+  scale_fill_manual(
+    values = c("#0066CC", "#FF6633", "#228B22")
+  ) +
+  theme_minimal()
+```
+
+---
+
+## Densidad: Resultado
+
+\begin{center}
+\includegraphics[width=0.85\textwidth]{img_sesion3/densidad.png}
+\end{center}
+
+---
+
+## Scatter con Regresión
+
+Código (extraíble):
+
+```{r}
+#| echo: fenced
+#| eval: false
+ggplot(mpg, aes(x = displ, y = hwy)) +
+  geom_point(aes(color = drv),
+             size = 2.5, alpha = 0.7) +
+  geom_smooth(method = "lm", se = TRUE,
+              color = "gray30",
+              linetype = "dashed") +
+  labs(title = "Cilindrada vs Eficiencia",
+       x = "Cilindrada (litros)",
+       y = "Millas por galón (hwy)",
+       color = "Tracción") +
+  scale_color_manual(
+    values = c("#0066CC", "#FF6633", "#228B22")
+  ) +
+  theme_minimal()
+```
+
+---
+
+## Scatter: Resultado
+
+\begin{center}
+\includegraphics[width=0.85\textwidth]{img_sesion3/scatter.png}
+\end{center}
+
+---
+
+## Serie Temporal
+
+Código (extraíble):
+
+```{r}
+#| echo: fenced
+#| eval: false
+data(economics, package = "ggplot2")
+
+ggplot(economics, aes(x = date,
+                      y = unemploy / 1000)) +
+  geom_area(fill = "#0066CC", alpha = 0.2) +
+  geom_line(color = "#0066CC",
+            linewidth = 0.6) +
+  labs(title = "Desempleo en el Tiempo",
+       x = "", y = "Desempleados (miles)") +
+  theme_minimal()
+```
+
+---
+
+## Serie Temporal: Resultado
+
+\begin{center}
+\includegraphics[width=0.85\textwidth]{img_sesion3/serie.png}
+\end{center}
+
+---
+
+## Facetas (Paneles Múltiples)
+
+Código (extraíble):
+
+```{r}
+#| echo: fenced
+#| eval: false
+ggplot(mpg, aes(x = displ, y = hwy)) +
+  geom_point(color = "#0066CC", alpha = 0.5) +
+  geom_smooth(method = "loess", se = FALSE,
+              color = "gray30") +
+  facet_wrap(~drv) +
+  labs(title = "Cilindrada vs Eficiencia por Tracción",
+       x = "Cilindrada (L)",
+       y = "MPG (hwy)") +
+  theme_minimal()
+```
+
+---
+
+## Facetas: Resultado
+
+\begin{center}
+\includegraphics[width=0.95\textwidth]{img_sesion3/facetas.png}
+\end{center}
+
+---
+
+## Guardar Gráficos
+
+Código (extraíble):
+
+```{r}
+#| echo: fenced
+#| eval: false
+# Guardar el último gráfico generado
+ggsave("grafico.png",
+       width = 7, height = 4, dpi = 300)
+
+# Guardar un objeto específico
+p <- ggplot(mpg, aes(displ, hwy)) +
+  geom_point()
+
+ggsave("scatter.pdf", plot = p,
+       width = 7, height = 4)
+```
+
+**Para presentaciones**: PNG a 300 dpi. **Para publicaciones**: PDF (vectorial, escala sin perder calidad).
+
+---
+
+# Parte 5: Tablas con gt
+
+## ¿Qué es el Paquete gt?
+
+:::{.block}
+### Grammar of Tables
+El paquete `gt` construye tablas de presentación profesional por capas, igual que ggplot2 hace con gráficos. Ideal para informes y publicaciones.
+:::
+
+```{r}
+#| echo: fenced
+#| eval: false
+install.packages("gt")
+library(gt)
+```
+
+**Componentes de una tabla gt:**
+
+- Encabezado (título y subtítulo)
+- Cuerpo (datos)
+- Etiquetas de columna (spanners)
+- Notas al pie
+- Formato de celdas (moneda, %, decimales)
+
+---
+
+## Tabla de Frecuencias en R
+
+Código (extraíble):
+
+```{r}
+#| echo: fenced
+#| eval: false
+library(tidyverse)
+
+# Tabla de frecuencia con proporciones
+mpg %>%
+  count(class) %>%
+  mutate(
+    frec_rel = n / sum(n),
+    frec_acum = cumsum(frec_rel)
+  )
+```
+
+Para una versión con formato profesional, usamos `gt`.
+
+---
+
+## Tabla de Frecuencias: Resultado
+
+\begin{center}
+\includegraphics[width=0.75\textwidth]{img_sesion3/tabla_freq.png}
+\end{center}
+
+---
+
+## Tabla Resumen con gt
+
+Código (extraíble):
+
+```{r}
+#| echo: fenced
+#| eval: false
+library(gt)
+
+mpg %>%
+  group_by(class) %>%
+  summarise(
+    n = n(),
+    media = mean(hwy),
+    mediana = median(hwy),
+    desv = sd(hwy)
+  ) %>%
+  gt() %>%
+  tab_header(
+    title = "Estadísticas por Clase",
+    subtitle = "Eficiencia en carretera"
+  ) %>%
+  fmt_number(columns = c(media, mediana, desv),
+             decimals = 1) %>%
+  cols_label(n = "N", media = "Media",
+             mediana = "Mediana",
+             desv = "Desv. Est.")
+```
+
+---
+
+## Tabla gt con Estilo
+
+Código (extraíble):
+
+```{r}
+#| echo: fenced
+#| eval: false
+mpg %>%
+  group_by(class) %>%
+  summarise(media = mean(hwy),
+            desv = sd(hwy)) %>%
+  gt() %>%
+  tab_header(title = "Eficiencia por Clase") %>%
+  fmt_number(columns = c(media, desv),
+             decimals = 1) %>%
+  data_color(
+    columns = media,
+    colors = scales::col_numeric(
+      palette = c("white", "#0066CC"),
+      domain = NULL)
+  ) %>%
+  tab_options(
+    heading.background.color = "#0066CC",
+    column_labels.font.weight = "bold"
+  )
+```
+
+---
+
+## Tabla gt: Resultado
+
+\begin{center}
+\includegraphics[width=\textwidth]{img_sesion3/tabla_gt.png}
+\end{center}
+
+---
+
+## Exportar Tablas gt
+
+Código (extraíble):
+
+```{r}
+#| echo: fenced
+#| eval: false
+tabla <- mpg %>%
+  group_by(class) %>%
+  summarise(media = mean(hwy)) %>%
+  gt()
+
+# Guardar como imagen
+gtsave(tabla, "tabla.png")
+
+# Guardar como HTML
+gtsave(tabla, "tabla.html")
+
+# Guardar como Word
+gtsave(tabla, "tabla.docx")
+```
+
+**Ventaja de gt sobre Excel**: la misma tabla se exporta a PNG, HTML, PDF, Word o LaTeX con una línea, manteniendo el formato.
+
+---
+
+## Ejercicio 3: Visualización en R (30% R)
+
+:::{.block}
+### Situación
+Usando el dataset nativo `mpg`, el área de análisis necesita un mini-reporte reproducible con estadísticas y gráficos.
+:::
+
+**Objetivo**: Generar una tabla resumen con `gt` y tres gráficos con ggplot2 aplicando la paleta Whale.
+
+**Pasos principales:**
+
+1. Carga `library(tidyverse)`, `library(gt)` y `data(mpg)`
+2. Tabla `gt`: media y desv. de `hwy` por `class`
+3. Histograma de `hwy`
+4. Boxplot de `hwy` por `drv`
+5. Scatter de `displ` vs `hwy` coloreado por `class`
+6. Exporta todo con `ggsave()` y `gtsave()`
+
+---
+
+# Cierre
+
+## Resumen: Excel vs Stata vs R
+
+| Tarea | Excel | Stata | R |
+|---|---|---|---|
+| Media/mediana | `=PROMEDIO` | `summarize` | `mean()` |
+| Desv. estándar | `=DESVEST.M` | `summarize` | `sd()` |
+| Tabla por grupo | Tabla dinámica | `tabstat, by()` | `group_by` |
+| Frecuencias | Tabla dinámica | `tabulate` | `count()` |
+| Histograma | Insertar gráfico | `histogram` | `geom_histogram()` |
+| Barras | Gráfico barras | `graph bar` | `geom_bar()` |
+| Boxplot | Gráfico de caja | `graph box` | `geom_boxplot()` |
+| Dispersión | Gráfico XY | `twoway scatter` | `geom_point()` |
+| Tabla formato | Manual | `tabstat` | `gt()` |
+
+---
+
+## Catálogo de Gráficos ggplot2
+
+| Gráfico | geom | Variables |
+|---|---|---|
+| Histograma | `geom_histogram` | 1 numérica |
+| Densidad | `geom_density` | 1 numérica |
+| Barras | `geom_bar` | 1 categórica |
+| Boxplot | `geom_boxplot` | Cat × Num |
+| Dispersión | `geom_point` | Num × Num |
+| Línea | `geom_line` | Temporal |
+| Área | `geom_area` | Temporal |
+| Facetas | `facet_wrap` | Multivariado |
+
+---
+
+## Lo que Lograste Hoy
+
+**En Excel:**
+
+- Funciones estadísticas y Análisis de datos
+- Tablas dinámicas para resúmenes por grupo
+- Histogramas, barras, líneas y dispersión
+
+**En R:**
+
+- Medidas descriptivas con `summarise()`
+- 7 tipos de gráficos en ggplot2 con paleta Whale
+- Tablas profesionales con `gt`
+- Exportación reproducible
+
+---
+
+## Próxima Sesión
+
+### Sesión 4: Probabilidad e Inferencia
+
+- Distribuciones de probabilidad
+- Distribución normal
+- Intervalos de confianza
+- Introducción a pruebas de hipótesis
+
+**Preparación**: Traer los gráficos y tablas de hoy. Los usaremos para interpretar resultados inferenciales.
+
+---
+
+## Referencias
+
+:::{.block}
+### Textos Esenciales
+- Kabacoff, R. (2024). *Modern Data Visualization with R*. CRC Press. https://rkabacoff.github.io/datavis/
+- Wickham, H. (2016). *ggplot2: Elegant Graphics for Data Analysis*. Springer.
+- Iannone, R. et al. (2024). *gt: Easily Create Presentation-Ready Display Tables*. CRAN.
+- StataCorp. (2023). *Stata User's Guide*. https://www.stata.com/manuals/u.pdf
+- Mitchell, M. N. (2022). *A Visual Guide to Stata Graphics*. 4th ed. Stata Press.
+- Healy, K. (2018). *Data Visualization: A Practical Introduction*. Princeton University Press.
+:::
+
+---
+
+*Sesión 3: Estadística Descriptiva y Visualización*
+*Escuela Global - Estadística Aplicada*
+*Enfoque: Excel-First, Migración Natural a R*

@@ -1,0 +1,13 @@
+# Datos pesados
+*.dta
+*.sav
+*.Rdata
+
+# Temporales de Office y R
+~$*
+.Rhistory
+.RData
+.Rproj.user/
+
+# Salidas regenerables
+*.log

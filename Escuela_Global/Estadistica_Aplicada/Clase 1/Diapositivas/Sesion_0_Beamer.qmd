@@ -1,0 +1,670 @@
+---
+title: "Estadística Descriptiva e Inferencial Aplicada con Softwares e Inteligencia Artificial"
+subtitle: "Sesión 0: Entorno de Trabajo y Configuración"
+author: "Escuela Global"
+date: "`r Sys.Date()`"
+format:
+  beamer:
+    theme: default
+    
+    colortheme: whale
+    fonttheme: default
+    navigation: frame
+    toc: false
+    toc-depth: 1
+    slide-number: true
+    include-in-header:
+      text: |
+        \usepackage{xcolor}
+        \definecolor{EscuelaGlobal}{RGB}{51, 102, 204}
+# bibliography: "referencias.bib"
+lang: es
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, 
+                      fig.align = 'center', fig.width = 8, fig.height = 5)
+```
+
+# Introducción
+
+## Contexto de la Sesión
+
+El análisis estadístico riguroso requiere de herramientas profesionales que garanticen:
+
+:::{.block}
+### Características Esenciales
+- **Reproducibilidad**: Otros analistas pueden verificar exactamente qué se hizo
+- **Escalabilidad**: Funciona con millones de registros, no solo miles
+- **Auditabilidad**: Cada paso queda documentado permanentemente
+- **Colaboración**: Código compartible entre equipos y organizaciones
+:::
+
+Esta sesión establece los fundamentos técnicos para lograr estos objetivos.
+
+## Problema Motivador
+
+En organizaciones profesionales, los analistas enfrentan desafíos comunes:
+
+- Solicitudes para analizar datos de múltiples fuentes (finanzas, operaciones, recursos humanos)
+- Diferentes analistas utilizan métodos inconsistentes
+- Cuando se necesita auditar un análisis anterior, resulta imposible reproducirlo
+- Los resultados no son verificables ni documentados apropiadamente
+
+**Pregunta Central**: ¿Cómo establecer un flujo de trabajo que sea reproducible, profesional y auditable?
+
+# Objetivos y Competencias
+
+## Objetivos de Aprendizaje
+
+Al término de esta sesión, el participante será capaz de:
+
+:::{.block}
+### Competencias Técnicas
+1. Instalar y configurar correctamente R y RStudio
+2. Navegar la interfaz integrada de desarrollo (IDE) de RStudio
+3. Ejecutar comandos básicos de R con sintaxis correcta
+4. Crear un proyecto profesional con estructura de directorios
+5. Instalar y cargar paquetes estadísticos especializados
+6. Documentar análisis mediante R Markdown (introducción a Quarto)
+:::
+
+## Tiempo Estimado
+
+- **Tiempo de clase**: 90 minutos
+- **Componentes**: Instalación (20 min) + Demostración (40 min) + Práctica (30 min)
+
+# ¿Por Qué R en Contexto Profesional?
+
+## Comparativa de Herramientas
+
+| Característica | Excel | SPSS | Stata | **R** |
+|---|---|---|---|---|
+| Reproducibilidad | ✗ | ⚠ | ⚠ | ✓ |
+| Escala de datos | ✗ | ⚠ | ⚠ | ✓ |
+| Costo | \$ | \$\$\$ | \$\$\$ | Libre |
+| Comunidad activa | Pequeña | Media | Media | **Muy grande** |
+| Automatización | ✗ | Parcial | Parcial | ✓ |
+| Visualización | Básica | Media | Media | **Excelente** |
+
+## Reproducibilidad: El Concepto Clave
+
+:::{.block}
+### Definición Operativa
+Un análisis es reproducible cuando:
+
+1. Se obtienen exactamente los mismos datos de entrada
+
+2. Se ejecuta exactamente el mismo código
+
+3. Se producen exactamente los mismos resultados
+
+En Excel: Imposible auditar    |    En R: Completamente transparente
+:::
+
+---
+
+# Instalación y Configuración
+
+## Paso 1: Instalar R
+
+R es un lenguaje de programación estadístico de acceso abierto, desarrollado por la R Foundation desde 1993.
+
+:::{.block}
+### Instrucciones de Instalación
+1. Descargar desde: **https://cran.r-project.org/**
+2. Seleccionar sistema operativo (Windows, macOS, Linux)
+3. Elegir versión base (la más reciente)
+4. Instalar con configuración predeterminada
+5. **No abrir directamente**: Se utilizará a través de RStudio
+:::
+
+**Verificación**: Buscar en aplicaciones instaladas "R x.x.x"
+
+## Paso 2: Instalar RStudio
+
+RStudio es un Entorno Integrado de Desarrollo (IDE) que facilita el trabajo con R mediante interfaz gráfica.
+
+:::{.block}
+### Instrucciones de Instalación
+1. Descargar desde: **https://posit.co/download/rstudio-desktop/**
+2. Seleccionar versión gratuita (RStudio Desktop Free)
+3. Elegir instalador según sistema operativo
+4. Instalar con configuración predeterminada
+5. Abrir RStudio (automáticamente detectará R instalado)
+:::
+
+**Verificación**: Abierto correctamente si se observan 4 paneles diferenciados
+
+# Interfaz de RStudio
+
+## Los Cuatro Paneles Fundamentales
+
+:::{.block}
+### Panel Superior Izquierdo: Script/Fuente
+Espacio de edición donde se escribe código reproducible. Se guarda como archivos `.R` o `.Rmd`
+:::
+
+:::{.block}
+### Panel Inferior Izquierdo: Consola
+Interprete de comandos donde R ejecuta código. Muestra resultados inmediatamente.
+:::
+
+:::{.block}
+### Panel Superior Derecho: Entorno (Environment)
+Visualiza variables creadas en memoria durante la sesión. Incluye historial de comandos ejecutados.
+:::
+
+:::{.block}
+### Panel Inferior Derecho: Multifuncional
+Gestiona archivos, gráficos, paquetes, ayuda y otros recursos. Pestaña configurable según necesidad.
+:::
+
+## Organización Espacial de RStudio
+
+```
+┌─────────────────────────────────────┬─────────────────────┐
+│                                     │                     │
+│         Script/Fuente               │   Environment       │
+│         (código aquí)               │   (variables)       │
+│                                     │                     │
+├─────────────────────────────────────┼─────────────────────┤
+│                                     │                     │
+│         Consola                     │  Files/Plots/Help   │
+│         (resultados)                │  (recursos)         │
+│                                     │                     │
+└─────────────────────────────────────┴─────────────────────┘
+```
+
+# Primeros Comandos en R
+
+## Conceptos Fundamentales
+
+:::{.block}
+### Variables y Asignación
+En R, la asignación se realiza con el operador `<-`:
+```r
+edad <- 28          # Asigna el valor 28 a la variable "edad"
+edad                # Muestra el contenido de la variable
+```
+
+Esta "caja etiquetada" contiene un valor que podemos reutilizar.
+:::
+
+## Ejercicio 1: Operaciones Aritméticas Básicas
+
+**Instrucción**: Ejecuta las siguientes líneas en la Consola (Panel Inferior Izquierdo):
+
+```r
+# Operaciones aritméticas
+2 + 2               # Suma
+5 * 3               # Multiplicación
+10 / 2              # División
+2^3                 # Potencia
+```
+
+**Pregunta**: ¿Cuál es el resultado de `2^3`?
+
+---
+
+## Solución Esperada - Ejercicio 1
+
+```r
+> 2 + 2
+[1] 4
+
+> 5 * 3
+[1] 15
+
+> 10 / 2
+[1] 5
+
+> 2^3
+[1] 8
+```
+
+El número `[1]` indica que es el primer (y único) elemento del resultado.
+
+## Ejercicio 2: Creación de Variables y Vectores
+
+**Instrucción**: Ejecuta las siguientes líneas:
+
+```r
+# Variables simples
+salario <- 50000
+empleados <- 120
+
+# Vectores (colecciones de valores)
+ingresos <- c(100000, 120000, 115000, 125000, 130000)
+
+# Operaciones con vectores
+mean(ingresos)      # Media aritmética
+sum(ingresos)       # Suma total
+length(ingresos)    # Cantidad de elementos
+```
+
+**Pregunta**: ¿Cuál es el ingreso promedio del vector?
+
+---
+
+## Solución Esperada - Ejercicio 2
+
+```r
+> ingresos <- c(100000, 120000, 115000, 125000, 130000)
+> mean(ingresos)
+[1] 124000
+
+> sum(ingresos)
+[1] 620000
+
+> length(ingresos)
+[1] 5
+```
+
+Observación importante: `mean()`, `sum()` y `length()` son **funciones** que operan sobre vectores.
+
+# Estructura de Proyectos Profesionales
+
+## El Concepto de Proyecto en RStudio
+
+:::{.block}
+### Definición
+Un Proyecto en RStudio es una carpeta que contiene:
+- Un archivo `.Rproj` (metadatos del proyecto)
+- Subdirectorios organizados
+- Código fuente
+- Datos
+- Resultados
+
+Esto garantiza que todos los análisis dentro del proyecto sean **reproducibles** y **auto-contenidos**.
+:::
+
+## Crear un Proyecto Profesional
+
+En RStudio:
+
+1. **File** → **New Project**
+2. Seleccionar **New Directory** → **New Project**
+3. Nombrar: `Estadistica_Analisis`
+4. Elegir ubicación en el sistema de archivos
+5. Click en **Create Project**
+
+**Verificación**: En la Consola ejecutar:
+
+```r
+getwd()  # Muestra el directorio de trabajo actual
+```
+
+## Estructura Recomendada de Directorios
+
+Una vez creado el proyecto, crear esta estructura:
+
+```
+Estadistica_Analisis/
+├── data/                # Datos crudos (NUNCA MODIFICAR)
+│   └── raw_data.csv
+├── scripts/             # Código R y R Markdown
+│   ├── 01_exploracion.R
+│   └── 02_analisis.Rmd
+├── outputs/             # Resultados, gráficos, reportes
+│   └── graficos/
+├── docs/                # Documentación, referencias
+│   └── notas.txt
+└── Estadistica_Analisis.Rproj
+```
+
+## Ejercicio 3: Crear Proyecto y Estructura
+
+**Instrucción**:
+
+1. Crear nuevo proyecto llamado `Mi_Primer_Proyecto`
+2. En la carpeta del proyecto, crear los 4 subdirectorios listados arriba
+3. Ejecutar en Consola: `getwd()`
+
+**Pregunta**: ¿Cuál es la ruta del directorio de trabajo?
+
+---
+
+## Solución Esperada - Ejercicio 3
+
+La Consola mostrará algo similar a:
+
+```r
+> getwd()
+[1] "/home/usuario/Mi_Primer_Proyecto"
+
+# O en Windows:
+[1] "C:/Users/usuario/Mi_Primer_Proyecto"
+```
+
+Carpetas creadas:
+```
+Mi_Primer_Proyecto/
+├── data/
+├── scripts/
+├── outputs/
+├── docs/
+└── Mi_Primer_Proyecto.Rproj
+```
+
+# Paquetes Estadísticos
+
+## Concepto de Paquete en R
+
+:::{.block}
+### Definición Técnica
+Un paquete es una colección organizada de:
+- Funciones especializadas
+- Datos de ejemplo
+- Documentación
+- Métodos estadísticos avanzados
+
+R base contiene funciones estándar. Los paquetes **extienden** esa funcionalidad.
+:::
+
+## Diferencia: Instalar vs Cargar
+
+:::{.block}
+### INSTALAR un paquete (una sola vez)
+```r
+install.packages("tidyverse")
+```
+Descarga el paquete desde CRAN (Comprehensive R Archive Network) a tu computadora.
+:::
+
+:::{.block}
+### CARGAR un paquete (cada sesión)
+```r
+library(tidyverse)
+```
+Lo trae a memoria para usar sus funciones durante esa sesión.
+
+**Analogía**: Instalar = comprar una app | Cargar = abrir la app
+:::
+
+## Paquetes Esenciales para Este Curso
+
+
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lll}
+\textbf{Paquete} & \textbf{Función} & \textbf{Comando de Instalación} \\
+\hline
+\texttt{tidyverse} & Manipulación de datos & \texttt{install.packages("tidyverse")} \\
+\texttt{readxl} & Leer archivos Excel & \texttt{install.packages("readxl")} \\
+\texttt{openxlsx} & Escribir archivos Excel & \texttt{install.packages("openxlsx")} \\
+\texttt{janitor} & Limpieza de nombres & \texttt{install.packages("janitor")} \\
+\texttt{ggplot2} & Visualización avanzada & \texttt{install.packages("ggplot2")} \\
+\end{tabular}
+}
+
+
+## Ejercicio 4: Instalar Paquetes
+
+**Instrucción**: En la Consola, ejecutar:
+
+```r
+install.packages("tidyverse")
+```
+
+Esto puede tardar 3-5 minutos. Esperar hasta ver el mensaje:
+```
+successfully unpacked and MD5 sums checked
+```
+
+Luego verificar:
+```r
+library(tidyverse)
+```
+
+**Pregunta**: ¿Aparecen errores al cargar tidyverse?
+
+---
+
+## Solución Esperada - Ejercicio 4
+
+Si se instaló correctamente, verá:
+
+```r
+> library(tidyverse)
+── Attaching packages ─────────────────────── 
+✓ ggplot2   3.4.0
+✓ dplyr     1.1.0
+✓ tidyr     1.3.0
+✓ readr     2.1.4
+...
+```
+
+Si hay errores, revisar:
+1. ¿Hay conexión a internet?
+2. ¿R tiene permisos de escritura?
+3. ¿La sintaxis es correcta?
+
+# Documentación Reproducible con R Markdown
+
+## Introducción a R Markdown
+
+:::{.block}
+### Definición
+R Markdown es un formato que integra:
+- Texto explicativo en Markdown
+- Código R ejecutable
+- Resultados y gráficos generados automáticamente
+
+**Resultado**: Reportes profesionales, reproducibles y dinámicos
+:::
+
+## Ventajas de la Documentación Reproducible
+
+:::{.block}
+### Beneficios Profesionales
+1. **Transparencia**: Cualquiera puede ver exactamente qué se hizo
+2. **Verificabilidad**: Otros analistas pueden ejecutar el mismo código
+3. **Mantenibilidad**: Cambios en datos se reflejan automáticamente
+4. **Documentación**: Explicación junto al código
+:::
+
+## Estructura de un Archivo R Markdown
+
+Un archivo `.Rmd` contiene:
+
+```markdown
+---
+title: "Mi Análisis"
+author: "Nombre"
+date: "2024-01-15"
+output: html_document
+---
+
+# Sección 1: Introducción
+
+Texto explicativo aquí.
+
+## Código R en "chunk"
+
+` ` ` {r}
+datos <- c(10, 20, 30)
+mean(datos)
+` ` `
+
+El resultado aparece automáticamente.
+```
+
+## Ejercicio 5: Crear tu Primer R Markdown
+
+**Instrucción**:
+
+1. En RStudio: **File** → **New File** → **R Markdown**
+2. Completar: Título, Autor, Formato (HTML)
+3. Click **Create**
+4. Agregar contenido:
+
+```markdown
+# Mi Primer Análisis
+
+## Datos de Ingresos
+
+` ` ` {r}
+ingresos <- c(50000, 60000, 55000, 65000)
+mean(ingresos)
+sd(ingresos)
+` ` `
+```
+
+5. Click **Knit** (arriba a la izquierda)
+6. Visualizar HTML generado
+
+**Pregunta**: ¿Se generó correctamente el HTML?
+
+---
+
+## Solución Esperada - Ejercicio 5
+
+Si todo funciona, verá un documento HTML con:
+
+1. Título: "Mi Primer Análisis"
+2. Sección con los ingresos
+3. Resultados calculados:
+   ```
+   > mean(ingresos)
+   [1] 57500
+   
+   > sd(ingresos)
+   [1] 7071.068
+   ```
+
+El documento es **reproducible**: cualquiera puede ejecutar el código y obtener exactamente los mismos resultados.
+
+# Flujo de Trabajo Profesional
+
+## Ciclo Iterativo de Análisis
+
+:::{.block}
+### El Proceso NO es Lineal
+```
+Escribir código
+    ↓
+Ejecutar línea por línea (Ctrl+Enter)
+    ↓
+Ver resultados/errores
+    ↓
+¿Funciona?  NO → Ajustar
+    ↓
+    SÍ
+    ↓
+Documentar y comentar
+    ↓
+Knit (generar reporte)
+    ↓
+Compartir/Guardar
+```
+:::
+
+## Buenas Prácticas Profesionales
+
+:::{.block}
+### Estándares en el Flujo de Trabajo
+1. **Nombres significativos**: `datos_ventas` no `x`
+2. **Comentarios claros**: Explicar *por qué*, no *qué*
+3. **Modularidad**: Funciones pequeñas y especializadas
+4. **Validación**: Verificar datos intermedios
+5. **Documentación**: Usar R Markdown sistemáticamente
+:::
+
+# Resumen y Checkpoint
+
+## Conceptos Clave Cubiertos
+
+:::{.block}
+### Fundamentos Técnicos
+- R es un lenguaje de programación estadístico reproducible
+- RStudio es el IDE que facilita el trabajo con R
+- Los 4 paneles de RStudio sirven para editar, ejecutar, visualizar y gestionar
+- Las variables se crean con `<-` y operan sobre vectores
+- Un Proyecto organiza el análisis de forma profesional
+:::
+
+## Checkpoint: Preguntas de Verificación
+
+Responde internamente:
+
+1. ¿Cuál es la diferencia entre R y RStudio?
+2. ¿Por qué es importante la reproducibilidad en análisis profesional?
+3. ¿Qué hace la función `mean()` y sobre qué tipo de datos opera?
+4. ¿Cuál es la estructura recomendada de carpetas en un Proyecto?
+5. ¿Por qué se usan paquetes si R base ya tiene funciones?
+
+---
+
+## Verificación de Comprensión
+
+Si respondiste correctamente a 4 de 5 preguntas:
+
+✓ Comprendiste los fundamentos de esta sesión  
+✓ Estás listo para la Sesión 1  
+✓ Tienes R, RStudio y paquetes instalados  
+
+Si respondiste menos de 3:
+
+⚠ Revisar las secciones anteriores  
+⚠ Ejecutar nuevamente los ejercicios  
+⚠ Consultar con el instructor antes de continuar
+
+# Próxima Sesión
+
+## Sesión 1: Gestión y Preparación de Datos
+
+En la próxima sesión abordaremos:
+
+:::{.block}
+### Temas Principales
+1. **Importación**: CSV, Excel, APIs
+2. **Diagnóstico**: Problemas de calidad
+3. **Limpieza**: Tratamiento de inconsistencias
+4. **Transformación**: Variables derivadas
+5. **Documentación**: Diccionarios de datos
+6. **Exportación**: Datos listos para análisis
+:::
+
+**Preparación**: Traer un archivo Excel o CSV para practicar
+
+# Referencias y Recursos
+
+## Bibliografía Recomendada
+
+:::{.block}
+### Libros Esenciales
+- Wickham, H., & Grolemund, G. (2017). *R for Data Science*. O'Reilly Media.
+- Casella, G., & Berger, R. L. (2001). *Statistical Inference* (2nd ed.). Cengage Learning.
+- Peng, R. D. (2020). *R Programming for Data Science*. Disponible en https://bookdown.org/rdpeng/rprogdatascience/
+:::
+
+## Recursos Web
+
+- **CRAN**: https://cran.r-project.org/
+- **RStudio**: https://posit.co/
+- **Comunidad**: https://community.rstudio.com/
+- **Stack Overflow**: https://stackoverflow.com/questions/tagged/r
+- **Cheat Sheets**: https://rstudio.github.io/cheatsheets/
+
+## Contacto y Soporte
+
+Para dudas técnicas o errores de instalación:
+
+- Consultar documentación oficial de CRAN
+- Buscar en Stack Overflow (tag: [r])
+- Participar en RStudio Community
+- Enviar preguntas al instructor
+
+---
+
+## Conclusión
+
+Esta sesión ha establecido:
+
+✓ Entorno técnico profesional instalado  
+✓ Conceptos fundamentales de reproducibilidad  
+✓ Estructura de proyecto organizada  
+✓ Base para análisis estadístico riguroso  
+
+Estamos listos para avanzar a **Gestión y Preparación de Datos**.
+
