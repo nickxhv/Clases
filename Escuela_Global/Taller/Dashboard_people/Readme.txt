@@ -149,6 +149,32 @@ El logo va en **Insertar → Imagen**, anclado arriba a la izquierda y a la mism
 
 ---
 
+## Hallazgos del caso
+
+El dataset tiene cuatro patrones plantados. La gracia del taller es que el tablero los encuentre solo, así que conviene no leer esta sección antes de la sesión.
+
+<details>
+<summary>Ver los hallazgos (spoiler)</summary>
+
+**1. El canal de reclutamiento predice la permanencia.** Es el hallazgo más fuerte y sobrevive al control por turno y por sede.
+
+| Canal | Contrataciones 12M | Rotación 12M | Retención 180 d |
+|---|---:|---:|---:|
+| Portales de empleo | 259 (38.1 %) | 49.1 % | 63.2 % |
+| Redes sociales | 160 (23.6 %) | 43.2 % | 64.4 % |
+| Agencias temporales | 111 (16.3 %) | 43.9 % | 65.5 % |
+| Referidos | 89 (13.1 %) | **22.2 %** | **78.3 %** |
+| Ferias y convocatorias | 60 (8.8 %) | 33.6 % | 71.8 % |
+
+El canal del que más se contrata es el peor, y el mejor es apenas el 13 % de los ingresos. A 30 días las curvas de retención son indistinguibles (92–98 %); la separación ocurre entre el día 30 y el 90, lo que mueve el problema de *retención* a *selección e inducción*.
+
+**2. El turno noche castiga.** 53.9 % de rotación contra 34.6 % del turno mañana, dentro de las mismas áreas y con los mismos salarios base. Al cruzarlo con el canal aparece algo que ninguno de los dos cortes muestra por separado: el castigo del turno noche cae casi entero sobre los canales que traen desconocidos — los portales pasan de 38.2 % a 66.2 % al cambiar de turno, los referidos apenas de 19.7 % a 24.0 %.
+
+**3. Una sede y una jefatura concentran lo peor.** Trujillo rota 58.6 % con 35.6 % de ceses tempranos y el eNPS más bajo de las cinco sedes. Dentro de ella, una jefatura renovó su equipo completo en doce meses.
+
+**4. Se está yendo el talento, no el bajo desempeño.** 32.5 % de quienes renuncian tenían nota de 4.0 o más, frente a 23.2 % entre los activos. Y 20.1 % estaba por debajo de su banda salarial, contra 13.6 % de los que se quedan.
+
+</details>
 
 ---
 
