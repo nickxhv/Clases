@@ -1,0 +1,37 @@
+﻿Tabla,Campo,Tipo,Descripcion
+Empleados,ID_Empleado,Texto,Identificador único del empleado (clave primaria)
+Empleados,Genero,Texto,F / M
+Empleados,Fecha_Nacimiento,Fecha,Para calcular edad y rangos etarios
+Empleados,Fecha_Ingreso,Fecha,Fecha de ingreso a la empresa
+Empleados,Fecha_Cese,Fecha,Vacía = empleado activo al 31-oct-2026
+Empleados,Motivo_Cese,Texto,Motivo registrado. El Tipo_Cese (Voluntario / Involuntario) NO viene en la data: se crea en Power Query
+Empleados,Canal_Reclutamiento,Texto,Canal por el que ingresó. Contiene ~2% de filas con mayúsculas/espacios inconsistentes (se limpia en Power Query)
+Empleados,Turno,Texto,Mañana / Tarde / Noche
+Empleados,Salario_Mensual,Número,Sueldo básico mensual en soles (PEN)
+Empleados,ID_Area,Texto,Llave a Areas (área + puesto)
+Empleados,ID_Sede,Texto,Llave a Sedes
+Empleados,ID_Jefe,Texto,Llave a Jefes (jefe directo)
+Areas,ID_Area,Texto,Clave primaria (8 combinaciones área x puesto)
+Areas,Area,Texto,"Ventas, Cobranzas, Atención al Cliente, Soporte Técnico"
+Areas,Puesto,Texto,Asesor Junior / Asesor Senior
+Areas,Banda_Min,Número,Mínimo de la banda salarial del puesto
+Areas,Banda_Max,Número,Máximo de la banda salarial del puesto
+Sedes,ID_Sede,Texto,Clave primaria
+Sedes,Sede,Texto,"Lima, Arequipa, Trujillo, Piura, Cusco"
+Sedes,Region,Texto,Región geográfica
+Sedes,Tipo_Sede,Texto,Principal / Regional
+Jefes,ID_Jefe,Texto,Clave primaria (30 jefaturas de equipo)
+Jefes,Nombre_Jefe,Texto,Nombre ficticio del jefe directo
+Evaluaciones,ID_Evaluacion,Texto,Clave primaria
+Evaluaciones,ID_Empleado,Texto,Llave a Empleados. Solo evalúan quienes tienen 90+ días y siguen activos al cierre del semestre
+Evaluaciones,Semestre,Texto,"2025-S1, 2025-S2, 2026-S1"
+Evaluaciones,Fecha_Evaluacion,Fecha,Cierre del semestre
+Evaluaciones,Nota_Desempeno,Número,Escala 1.0 a 5.0
+Encuesta_Clima,ID_Respuesta,Texto,Clave primaria
+Encuesta_Clima,ID_Empleado,Texto,Llave a Empleados. Respuesta voluntaria (~65% de los activos con 30+ días)
+Encuesta_Clima,Trimestre,Texto,2025-T1 a 2026-T3
+Encuesta_Clima,Fecha_Encuesta,Fecha,Cierre del trimestre
+Encuesta_Clima,Puntaje_eNPS,Número,"0 a 10: ¿recomendarías trabajar aquí? Promotor 9-10, pasivo 7-8, detractor 0-6"
+Encuesta_Clima,Satisfaccion_Jefe,Número,Escala 1 a 5
+Calendario,Fecha,Fecha,"1-ene-2025 a 31-oct-2026, un registro por día"
+Calendario,Anio / Mes_Num / Mes / Anio_Mes / Trimestre / Semestre / Fin_de_Mes,Varios,Atributos de fecha para ejes y segmentadores

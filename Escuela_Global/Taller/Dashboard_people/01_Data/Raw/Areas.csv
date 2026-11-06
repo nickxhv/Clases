@@ -1,0 +1,9 @@
+﻿ID_Area,Area,Puesto,Banda_Min,Banda_Max
+A01,Ventas,Asesor Junior,1240,1580
+A02,Ventas,Asesor Senior,1680,2150
+A03,Cobranzas,Asesor Junior,1180,1510
+A04,Cobranzas,Asesor Senior,1610,2050
+A05,Atención al Cliente,Asesor Junior,1120,1440
+A06,Atención al Cliente,Asesor Senior,1530,1950
+A07,Soporte Técnico,Asesor Junior,1220,1550
+A08,Soporte Técnico,Asesor Senior,1650,2110
